@@ -6,7 +6,7 @@ with open('LoggerProject/requirements.txt') as fp:
 setup(name='LoggerProject',
       version='0.0.0.1+git',
       description='Hello World',
-      url='',
+      url='https://github.com/ibtehaz-shawon/LoggerProject',
       author='Ibtehaz Shawon',
       author_email='ibtehaz.shawon@gmail.com',
       license='MIT',

@@ -1,5 +1,6 @@
 from datetime import datetime
 from .utility import Utility
+from .FileLogger.file_logger import LogDump
 
 class ErrorLogger:
     def __init__(self, mongo_con, collection_name, timezone = None):
@@ -12,7 +13,8 @@ class ErrorLogger:
         self.STRF_TIMEFORMAT = '%A %d %B %Y - %I:%M:%S %p'
 
     def error_logging(self, user_id: str, message: str, 
-        point_of_origin: str = None, error_code: int = 400):
+        point_of_origin: str = None, error_code: int = 400,
+        file_dump: bool = False):
         """
         sets up error logging in mongo
         :param user_id: current facebook user id of the user
@@ -32,8 +34,7 @@ class ErrorLogger:
             error_payload['error_code'] = error_code  # 400 is default
 
             status = Utility.mongo_insert(self.mongo_con[self.collection_name], error_payload)
-            if not status:
-                # TODO: add filebased logging here!
-                print("Error occurred logging error!")
+            if file_dump:
+                LogDump().error_logging(user_id, error_payload)
         finally:
             return

@@ -5,7 +5,7 @@ from datetime import datetime
 from pytz import timezone
 from logging.handlers import TimedRotatingFileHandler
 
-class FileLog:
+class LogDump:
     def __init__(self):
         self.logger_message = logging.getLogger('logger_message_log')
         self.logger_error_log = logging.getLogger('logger_error_log')
