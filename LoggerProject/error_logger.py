@@ -1,9 +1,16 @@
 from datetime import datetime
 from .utility import Utility
 from .FileLogger.file_logger import LogDump
+from pytz import timezone
 
 class ErrorLogger:
-    def __init__(self, mongo_con, collection_name, timezone = None):
+    def __init__(self, mongo_con, collection_name, timezone:timezone = None):
+        """
+        :params mongo_con: a mongo db database 
+        :params: collection_name: name of the collection on mongoDB
+        :params: timezone: timezone, if user want to mention any specific timezone on report 
+        or else server time.
+        """
         self.mongo_con = mongo_con
         self.collection_name = collection_name
         if timezone is not None:
