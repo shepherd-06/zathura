@@ -9,4 +9,4 @@ class MessengerLogger:
         self.STRF_TIMEFORMAT = '%A %d %B %Y - %I:%M:%S %p'
 
     def messenger_logger(self):
-        pass
+        print("Work in progress!")

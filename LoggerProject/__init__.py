@@ -17,5 +17,7 @@ def create_app():
                 error_logger.error_logging(user_id = '123456',
                 message = 'Hello World', point_of_origin = create_app.__name__, 
                 error_code = 400, file_dump=True)
+        elif sys.argv[2] == 'v':
+            print("v0.0.0.1+git")
         else:
             print("unknown command")
