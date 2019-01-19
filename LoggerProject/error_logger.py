@@ -19,12 +19,8 @@ class LoggerP:
         point_of_origin: in which function this error occurred. To be more precise. for example: function.__name__ using the magic function.
 
         """
-        _id = str(uuid4())[0:10]  # just for future retreiving and uniqueness
-        _occurred_at_unix = datetime.utcnow()
         _occurred_at = datetime.now().strftime(Utility.get_timeformat())
         _resolved = False
-        _resolved_at = None
-        _resolved_at_unix = None
         pass
 
     def log_debug(self, user: str, debug_text: str, point_of_origin: str= None):
@@ -35,7 +31,4 @@ class LoggerP:
         point_of_origin: from which function or class are u recording this. Use the magic function, __name__ for ease.
 
         """
-        _id = str(uuid4())[0:10]  # just for future retreiving and uniqueness
-        _added_at = datetime.now().strftime(Utility.get_timeformat())
-        _added_at_unix = datetime.utcnow()
         pass
