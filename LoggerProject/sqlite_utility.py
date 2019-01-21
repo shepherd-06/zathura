@@ -7,6 +7,7 @@ class Sqlite_Utility:
     def __init__(self, *args, **kwargs):
         # TODO: should check if database is already connected or not.
         database_connection()  # initiate database connection before doing anything. 
+        self.empty_result = {"total": 0, "log": []}
 
     def insert_error_log(self, user, error_name, error_description, point_of_origin = None):
         if user is not None and error_name is not None and error_description is not None:
@@ -57,48 +58,65 @@ class Sqlite_Utility:
             "point_of_origin": debug_log_object.point_of_origin,
             "logged_at": debug_log_object.logged_at,
         }
+    
+    def __generate_error_return_payload(self, log_paylod):
+        """
+        generates error payload for return
+        """
+        all_error_logs = list()
+        for err in log_paylod:
+            all_error_logs.append(self.__error_obj_to_dict(err))
+        return {"total": len(all_error_logs), "log": all_error_logs}
+
+    def __generate_verbose_return_payload(self, debug_payload):
+        """
+        generates debug payload for return
+        """
+        all_logs = list()
+        for log in debug_payload:
+            all_logs.append(self.__debug_obj_to_dict(log))
+        return {"total": len(all_logs), "log": all_logs}
 
     def get_all_error_log(self):
         # returns all error_log table data on a list
         err_logs = ErrorLog.select()
-        all_logs = list()
-        for logs in err_logs:
-            all_logs.append(self.__error_obj_to_dict(logs))
-        all_logs.append({"total": len(all_logs)})
-        return all_logs
+        return self.__generate_error_return_payload(err_logs)
 
     def get_all_debug_log(self):
         # returns all debug_log table data on a list
         debug_logs = DebugLog.select()
-        all_logs = list()
-        for log in debug_logs:
-            all_logs.append(self.__debug_obj_to_dict(log))
-        all_logs.append({"total": len(all_logs)})
-        return all_logs
+        return self.__generate_verbose_return_payload(debug_logs)
 
-    def get_error_by_user(self, user, limit=None, generated_before:datetime = None, before: bool = True, error_name: str = None, point_of_origin:str = None):
+    def get_error_by_user(self, user: str, limit: int=0, asc:bool = True):
         # returns error generated for a user
         if len(user) == 0:
             print("Username cannot be empty for this function!")
-            return [{"total": 0}]
-        if generated_before is not None:
-            time = Utility.unix_time_millis(generated_before)
-            if before:
-                # if search by error_name
-                errors = ErrorLog.select().where(ErrorLog.user == user.split(), ErrorLog.logged_at <= time)
-            else:
-                errors = ErrorLog.select().where(ErrorLog.user == user.split(), ErrorLog.logged_at >= time)
-        else:
-            # brings all users error log without any fil
-            errors = ErrorLog.select().where(ErrorLog.user == user.split())
-        print(errors)
-        all_error_logs = list()
-        for err in errors:
-            all_error_logs.append(self.__error_obj_to_dict(err))
-        all_error_logs.append({"total": len(all_error_logs)})
-        return all_error_logs
+            return self.empty_result
+        errors = ErrorLog.select().where(ErrorLog.user == user)
+        return self.__generate_error_return_payload(errors)
+
+    def get_error_by_date_limit(self, beginning_limit: datetime, ending_limit: datetime = datetime.now(), limit:int = 0, asc: bool = True):
+        if beginning_limit is None:
+            print("First date limit cannot be empty!")
+            return self.empty_result
+        if type(ending_limit) != datetime:
+            ending_limit = datetime.now()
+        first_limit = Utility.unix_time_millis(beginning_limit)
+        last_limit = Utility.unix_time_millis(ending_limit)
+
+        errors = ErrorLog.select().where((ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit))
+        return self.__generate_error_return_payload(errors)
 
     # def search by error_name
+    def get_error_by_error_name(self, error_name: str):
+        if error_name is None:
+            print("Error name cannot be empty on this search")
+            return self.empty_result
+        if len(error_name) == 0:
+            print("Error name cannot be empty on this search")
+            return self.empty_result
+        errors = ErrorLog.select().where(ErrorLog.error_name == error_name)
+        return self.__generate_error_return_payload(errors)
 
     # def search by point_of_origin
 
