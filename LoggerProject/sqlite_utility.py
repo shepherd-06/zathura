@@ -1,6 +1,7 @@
 from uuid import uuid4
 from .sqlite_definition import ErrorLog, DebugLog, database_connection
 from datetime import datetime
+from .utility import Utility
 
 class Sqlite_Utility:
     def __init__(self, *args, **kwargs):
@@ -9,7 +10,8 @@ class Sqlite_Utility:
 
     def insert_error_log(self, user, error_name, error_description, point_of_origin = None):
         if user is not None and error_name is not None and error_description is not None:
-            error_log = ErrorLog(user = user, error_name = error_name, error_description = error_description, point_of_origin = point_of_origin)
+            from uuid import uuid4
+            error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name, error_description = error_description, point_of_origin = point_of_origin)
             return error_log.save()  # number of modified rows are returned. (Always be 1)
             # TODO: for future, log if any errors occurred while storing.
         else:
@@ -24,7 +26,8 @@ class Sqlite_Utility:
             
     def insert_debug_log(self, user, message_data, point_of_origin=None):
         if user is not None and message_data is not None:
-            debug_log = DebugLog(user=user, message_data = message_data, point_of_origin = point_of_origin)
+            from uuid import uuid4
+            debug_log = DebugLog(_id = str(uuid4()), user=user, message_data = message_data, point_of_origin = point_of_origin)
             return debug_log.save()
         else:
             if user is None:
@@ -73,12 +76,29 @@ class Sqlite_Utility:
         all_logs.append({"total": len(all_logs)})
         return all_logs
 
-    def get_error_by_user(self, user):
+    def get_error_by_user(self, user, limit=None, generated_before:datetime = None, before: bool = True, error_name: str = None, point_of_origin:str = None):
         # returns error generated for a user
-        errors = ErrorLog.select().where(ErrorLog.user == user.split())
+        if len(user) == 0:
+            print("Username cannot be empty for this function!")
+            return [{"total": 0}]
+        if generated_before is not None:
+            time = Utility.unix_time_millis(generated_before)
+            if before:
+                # if search by error_name
+                errors = ErrorLog.select().where(ErrorLog.user == user.split(), ErrorLog.logged_at <= time)
+            else:
+                errors = ErrorLog.select().where(ErrorLog.user == user.split(), ErrorLog.logged_at >= time)
+        else:
+            # brings all users error log without any fil
+            errors = ErrorLog.select().where(ErrorLog.user == user.split())
+        print(errors)
         all_error_logs = list()
         for err in errors:
             all_error_logs.append(self.__error_obj_to_dict(err))
         all_error_logs.append({"total": len(all_error_logs)})
         return all_error_logs
+
+    # def search by error_name
+
+    # def search by point_of_origin
 

@@ -6,3 +6,6 @@ dist/
 *.egg-info/
 logs/
 .idea/
+*.db
+FileLogger/*
+file_logger.py

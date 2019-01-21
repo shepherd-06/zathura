@@ -1,30 +1,31 @@
-from peewee import SqliteDatabase, Model, UUIDField, CharField, TextField, CharField, DateTimeField, BooleanField
+from peewee import SqliteDatabase, Model, UUIDField, CharField, TextField, CharField, BooleanField, IntegerField
 from playhouse.migrate import SqliteMigrator, migrate
 from datetime import datetime
-from uuid import uuid1
+from uuid import uuid4
+from .utility import Utility
 
 db = SqliteDatabase('logger.db')
 migrator = SqliteMigrator(db)
 
 class ErrorLog(Model):
-    _id = UUIDField(unique=True, primary_key = False, default=str(uuid1()))
+    _id = UUIDField(unique=True, primary_key = False, default=str(uuid4()))
     user = CharField(null=False, max_length=40)
     error_name = CharField(null=False, max_length=20)
     error_description = TextField(null=False)
     point_of_origin = CharField(null=True, default = None, max_length=20)
-    logged_at = DateTimeField(default=datetime.now())
+    logged_at = IntegerField(default=Utility.current_time_in_milli())
     is_resolved = BooleanField(default=False)
-    resolved_at = DateTimeField(null=True)
+    resolved_at = IntegerField(null=True)
 
     class Meta:
         database = db
 
 class DebugLog(Model):
-    _id = UUIDField(unique=True, primary_key = False, default=str(uuid1()))
+    _id = UUIDField(unique=True, primary_key = False, default=str(uuid4()))
     user = CharField(max_length=40, null=False)
     message_data = TextField(null=False)
     point_of_origin = CharField(max_length=20, null=True)
-    logged_at = DateTimeField(default=datetime.now())
+    logged_at = IntegerField(default=Utility.current_time_in_milli())
 
     class Meta: 
         database = db
