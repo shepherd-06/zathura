@@ -7,5 +7,6 @@ dist/
 logs/
 .idea/
 *.db
+logger.db/
 FileLogger/*
 file_logger.py
