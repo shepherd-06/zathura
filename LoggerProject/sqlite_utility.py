@@ -2,6 +2,7 @@ from uuid import uuid4
 from .sqlite_definition import ErrorLog, DebugLog, database_connection
 from datetime import datetime
 from .utility import Utility
+from peewee import ModelSelect
 
 class Sqlite_Utility:
     def __init__(self, *args, **kwargs):
@@ -9,10 +10,10 @@ class Sqlite_Utility:
         database_connection()  # initiate database connection before doing anything. 
         self.empty_result = {"total": 0, "log": []}
 
-    def insert_error_log(self, user, error_name, error_description, point_of_origin = None):
-        if user is not None and error_name is not None and error_description is not None:
+    def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str):
+        if user is not None and error_name is not None and error_description is not None and point_of_origin is not None:
             from uuid import uuid4
-            error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name, error_description = error_description, point_of_origin = point_of_origin)
+            error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin.lower())
             return error_log.save()  # number of modified rows are returned. (Always be 1)
             # TODO: for future, log if any errors occurred while storing.
         else:
@@ -22,17 +23,24 @@ class Sqlite_Utility:
                 print("log against a specific error_name.")
             if error_description is None:
                 print("give an appropiate error_description")
+            if point_of_origin is None:
+                print("Provide appropiate error entry registry for better understanding!")
             print("unknown error occurred")
             return 0
             
-    def insert_debug_log(self, user, message_data, point_of_origin=None):
-        if user is not None and message_data is not None:
+    def insert_debug_log(self, message_data:str, point_of_origin:str =None,  developer:str = 'Logger_Test_User'):
+        """
+        Insert debug and verbose logs. Logs will purge after a week.
+        developer: the guy who is logging this message. It will be easier to find if u name urself.
+        message_data: what u want to log
+        point_of_origin: from where u are logging this message
+        It's not going to print out anything right now.
+        """
+        if message_data is not None:
             from uuid import uuid4
-            debug_log = DebugLog(_id = str(uuid4()), user=user, message_data = message_data, point_of_origin = point_of_origin)
+            debug_log = DebugLog(_id = str(uuid4()), user=developer, message_data = message_data.lower(), point_of_origin = point_of_origin.lower() if point_of_origin is not None else None)
             return debug_log.save()
-        else:
-            if user is None:
-                print("username cannot be None. It would be easier to log against the user") 
+        else: 
             if message_data is None:
                 print("message_data should not be NONE. Since it's what you are currently logging to remember right?")
             print("unknown error occurred")
@@ -59,7 +67,7 @@ class Sqlite_Utility:
             "logged_at": debug_log_object.logged_at,
         }
     
-    def __generate_error_return_payload(self, log_paylod):
+    def __generate_error_return_payload(self, log_paylod: ModelSelect):
         """
         generates error payload for return
         """
@@ -68,7 +76,7 @@ class Sqlite_Utility:
             all_error_logs.append(self.__error_obj_to_dict(err))
         return {"total": len(all_error_logs), "log": all_error_logs}
 
-    def __generate_verbose_return_payload(self, debug_payload):
+    def __generate_verbose_return_payload(self, debug_payload: ModelSelect):
         """
         generates debug payload for return
         """
@@ -119,4 +127,27 @@ class Sqlite_Utility:
         return self.__generate_error_return_payload(errors)
 
     # def search by point_of_origin
+    def get_error_by_origin(self, origin: str):
+        if origin is None:
+            print("Point of origin cannot be None")
+            return self.empty_result
+        if len(origin) == 0:
+            print("Point of origin cannot be None")
+            return self.empty_result
+        errors = ErrorLog.select().where(ErrorLog.point_of_origin == origin.lower())
+        return self.__generate_error_return_payload(errors)
+
+    # verbose/debug print out
+    def get_debug_by_origin(self, origin: str = ''):
+        if len(origin) == 0:
+            print("You are running blank search on sql")
+        debugs = DebugLog.select().where(DebugLog.point_of_origin == origin.lower())
+        return self.__generate_verbose_return_payload(debugs)
+
+    # verbose/debug search by developers name
+    # def get_debug_by_developers(self, developers_name: str = ''):
+    #     if len(developers_name) == 0:
+    #         print("You are running blank search on sql")
+    #     debugs = DebugLog.select().where(DebugLog.user == developers_name)
+    #     return
 

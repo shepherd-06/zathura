@@ -8,10 +8,11 @@ from git import Repo
 
 def create_app():
     # It should be hardcode False on production
-    known_commands = ('v', 'insert', 'get_all', 'user', 'get_debug_all', 'error_name', 'date', 'get_error_all')
+    known_commands = ('v', 'insert', 'debug_origin', 'get_all', 'user', 'get_debug_all', 'error_name', 'date', 'get_error_all', 'origin')
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
+                print("Current argument: {}".format(args))
                 sql_utils = Sqlite_Utility()
                 if args == 'v':
                     repo = Repo(os.getcwd())
@@ -24,7 +25,7 @@ def create_app():
                     for i in range(0, 10):
                         rows = sql_utils.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=create_app.__name__)
                         print("error inserted test: {}".format(rows))
-                        debug_rows = sql_utils.insert_debug_log(user="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
+                        debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
                         print("debug rows added {}".format(debug_rows))
                 elif args == 'get_all':
                     all_error_logs = sql_utils.get_all_error_log()
@@ -50,6 +51,10 @@ def create_app():
                     user = input("Enter a username: ")
                     logs = sql_utils.get_error_by_user(user)
                     print(logs)
+                elif args == 'origin':
+                    origin = input("Enter point of origin: ")
+                    logs = sql_utils.get_error_by_origin(origin)
+                    print(logs)
                 elif args == "date":
                     generated_after = input("Enter a date (limit_1): (dd/mm/yyyy format) ")
                     day, month, year = map(int, generated_after.split('/'))
@@ -64,6 +69,11 @@ def create_app():
                         generated_before = datetime(year, month, day, 0, 0, 0)
                     result = sql_utils.get_error_by_date_limit(generated_after, generated_before)
                     print(result)
+                elif args == 'debug_origin':
+                    origin = input("Enter <DEBUG> point of origin: ")
+                    verbose = sql_utils.get_debug_by_origin(origin)
+                    print(verbose)
             else:
                 print("unknown command - {}".format(args))
+                print("All commands - {}".format(known_commands))
                 break
