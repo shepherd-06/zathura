@@ -11,6 +11,9 @@ class Sqlite_Utility:
         self.empty_result = {'error': True} # TODO: Able to add error message here.
 
     def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str):
+        """
+        # Inserts error log on a sqlite db
+        """
         if user is not None and error_name is not None and error_description is not None and point_of_origin is not None:
             from uuid import uuid4
             error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin.lower())
@@ -30,11 +33,11 @@ class Sqlite_Utility:
             
     def insert_debug_log(self, message_data:str, point_of_origin:str =None,  developer:str = 'Logger_Test_User'):
         """
-        Insert debug and verbose logs. Logs will purge after a week.
+        # Insert debug and verbose logs. Logs will purge after a week.
+        # It's not going to print out anything right now.
         developer: the guy who is logging this message. It will be easier to find if u name urself.
         message_data: what u want to log
         point_of_origin: from where u are logging this message
-        It's not going to print out anything right now.
         """
         if message_data is not None:
             from uuid import uuid4
@@ -47,6 +50,10 @@ class Sqlite_Utility:
             return 0
 
     def __error_obj_to_dict(self, error_log_object: ErrorLog):
+        """
+        # generates and returns a dictionary from ErrorLog object
+        error_log_object: ErrorLog a ErrorLog object
+        """
         return {
             # '_id': error_log_object._id,
             'user': error_log_object.user,
@@ -59,6 +66,10 @@ class Sqlite_Utility:
         }
 
     def __debug_obj_to_dict(self, debug_log_object: DebugLog):
+        """
+        # generates & returns a dictionary from a DebugLog object.
+        debug_log_object: DebugLog a DebugLog object
+        """
         return {
             # "_id": debug_log_object._id,
             "user": debug_log_object.user,
@@ -69,7 +80,7 @@ class Sqlite_Utility:
     
     def __generate_error_return_payload(self, log_paylod: ModelSelect):
         """
-        generates error payload for return
+        # generates error payload for return
         """
         all_error_logs = list()
         for err in log_paylod:
@@ -78,7 +89,7 @@ class Sqlite_Utility:
 
     def __generate_verbose_return_payload(self, debug_payload: ModelSelect):
         """
-        generates debug payload for return
+        # generates debug payload for return
         """
         all_logs = list()
         for log in debug_payload:
@@ -154,7 +165,7 @@ class Sqlite_Utility:
 
     def get_error_by_date_limit(self, beginning_limit: datetime, ending_limit: datetime = None, limit:int = 0, desc: bool = False):
         """
-        get reports under a date limit from all users
+        # get reports under a date limit from all users
         beginning_limit: datetime starting time, inclusive
         ending_limit: datetime ending time, exclusive
         limit: int limits the number of search result.
@@ -187,7 +198,7 @@ class Sqlite_Utility:
     # def search by error_name
     def get_error_by_error_name(self, error_name: str, first_limit: datetime = None, last_limit: datetime = None, limit: int = 0, desc: bool = False):
         """
-        searches errors by error name. filters will be applied based on parameter
+        # searches errors by error name. filters will be applied based on parameter
         error_name: what's the name of error you want to search under.
         first_limit: first date limit to be applied
         last_limit: last date limit to be applied, not inclusive
@@ -252,7 +263,7 @@ class Sqlite_Utility:
     # verbose/debug print out
     def get_debug_by_origin(self, origin: str = '', first_limit: datetime = None, last_limit: datetime = None):
         """
-        returns all debug data filters by origin; if neededd.
+        # returns all debug data filters by origin; if neededd.
         first_limit: datetime filters out data before this limit
         last_limit: datetime filters out data after this limit
         origin: str point of origin of any debug msg that needs to be on this list.
@@ -274,7 +285,7 @@ class Sqlite_Utility:
     # verbose/debug search by developers name
     def get_debug_by_developers(self, developers_name: str = '', first_limit: datetime = None, last_limit: datetime = None):
         """
-        returns all debug data filters by developers; if neededd.
+        # returns all debug data filters by developers; if neededd.
         first_limit: datetime filters out data before this limit
         last_limit: datetime filters out data after this limit
         developers_name: str developers_name : who wrote the debug message. For debugging person. Could be None or empty string.
