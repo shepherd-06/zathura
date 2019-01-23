@@ -8,7 +8,7 @@ from git import Repo
 
 def create_app():
     # It should be hardcode False on production
-    known_commands = ('v', 'insert', 'debug_origin', 'get_all', 'user', 'get_debug_all', 'error_name', 'date', 'get_error_all', 'origin')
+    known_commands = ('v', 'insert', 'dev', 'debug_origin', 'get_all', 'user', 'get_debug_all', 'error_name', 'date', 'get_error_all', 'origin')
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
@@ -72,6 +72,10 @@ def create_app():
                 elif args == 'debug_origin':
                     origin = input("Enter <DEBUG> point of origin: ")
                     verbose = sql_utils.get_debug_by_origin(origin)
+                    print(verbose)
+                elif args == 'dev':
+                    dev = input("Enter the developers name: ")
+                    verbose = sql_utils.get_debug_by_developers(dev)
                     print(verbose)
             else:
                 print("unknown command - {}".format(args))

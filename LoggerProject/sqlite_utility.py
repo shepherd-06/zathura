@@ -145,9 +145,9 @@ class Sqlite_Utility:
         return self.__generate_verbose_return_payload(debugs)
 
     # verbose/debug search by developers name
-    # def get_debug_by_developers(self, developers_name: str = ''):
-    #     if len(developers_name) == 0:
-    #         print("You are running blank search on sql")
-    #     debugs = DebugLog.select().where(DebugLog.user == developers_name)
-    #     return
+    def get_debug_by_developers(self, developers_name: str = ''):
+        if len(developers_name) == 0:
+            print("You are running blank search on sql")
+        debugs = DebugLog.select().where(DebugLog.user == developers_name)
+        return self.__generate_verbose_return_payload(debugs)
 
