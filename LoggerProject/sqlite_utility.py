@@ -8,7 +8,7 @@ class Sqlite_Utility:
     def __init__(self, *args, **kwargs):
         # TODO: should check if database is already connected or not.
         database_connection()  # initiate database connection before doing anything. 
-        self.empty_result = {'error': True}
+        self.empty_result = {'error': True} # TODO: Able to add error message here.
 
     def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str):
         if user is not None and error_name is not None and error_description is not None and point_of_origin is not None:
@@ -60,7 +60,7 @@ class Sqlite_Utility:
 
     def __debug_obj_to_dict(self, debug_log_object: DebugLog):
         return {
-            "_id": debug_log_object._id,
+            # "_id": debug_log_object._id,
             "user": debug_log_object.user,
             "message-data": debug_log_object.message_data,
             "point_of_origin": debug_log_object.point_of_origin,
@@ -101,7 +101,7 @@ class Sqlite_Utility:
 
     def get_error_by_user(self, user: str, limit: int=0, desc:bool = False, first_limit: datetime = None, last_limit: datetime = None):
         """
-        # returns error generated for a user. datetime is both inclusive.
+        # returns error generated for a user. datetime is not both inclusive, exclude the last date.
         # username is mandatory in this case.
         # asceding order is by default otherwise.
         # ordering is when the error is logged.
@@ -109,7 +109,7 @@ class Sqlite_Utility:
         limit: int limits the number of error searchable
         desc: bool whether to show the result in ascending or descending order
         first_limit: datetime shows result after this limit
-        last_limit: shows result before this limit
+        last_limit: shows result before this limit (exclusive)
         """
         if len(user) == 0:
             print("Username cannot be empty for this function!")
@@ -134,7 +134,7 @@ class Sqlite_Utility:
             # filter by datetime. and same limit order
             first_limit = Utility.unix_time_millis(first_limit)
             if last_limit is None:
-                last_limit = datetime.now()
+                last_limit = Utility.current_time_in_milli()
             last_limit = Utility.unix_time_millis(last_limit)
             if limit != 0:
                 if desc:
@@ -152,16 +152,36 @@ class Sqlite_Utility:
                     errors = ErrorLog.select().where((ErrorLog.user == user) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit))
         return self.__generate_error_return_payload(errors)
 
-    def get_error_by_date_limit(self, beginning_limit: datetime, ending_limit: datetime = datetime.now(), limit:int = 0, asc: bool = True):
+    def get_error_by_date_limit(self, beginning_limit: datetime, ending_limit: datetime = None, limit:int = 0, desc: bool = False):
+        """
+        get reports under a date limit from all users
+        beginning_limit: datetime starting time, inclusive
+        ending_limit: datetime ending time, exclusive
+        limit: int limits the number of search result.
+        desc: bool whether to show the result in descending order
+        """
         if beginning_limit is None:
-            print("First date limit cannot be empty!")
+            print("Please insert the first date to search after a specific time.")
             return self.empty_result
-        if type(ending_limit) != datetime:
-            ending_limit = datetime.now()
+        if ending_limit is None:
+            ending_limit = Utility.current_time_in_milli()
         first_limit = Utility.unix_time_millis(beginning_limit)
         last_limit = Utility.unix_time_millis(ending_limit)
 
-        errors = ErrorLog.select().where((ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit))
+        if limit != 0:
+            if desc:
+                # search under a limit in descending order
+                errors = ErrorLog.select().where((ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc()).limit(limit)
+            else:
+                # search under a limit in ascending order
+                errors = ErrorLog.select().where((ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).limit(limit)
+        else:
+            if desc:
+                # search without limit in descending order
+                errors = ErrorLog.select().where((ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc())
+            else:
+                # search without limit in ascending order
+                errors = ErrorLog.select().where((ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit))
         return self.__generate_error_return_payload(errors)
 
     # def search by error_name
@@ -201,7 +221,7 @@ class Sqlite_Utility:
             debugs = DebugLog.select().where(DebugLog.point_of_origin == origin.lower())
         else:
             if first_limit is not None and last_limit is None:
-                last_limit = datetime.now()
+                last_limit = Utility.current_time_in_milli()
             first_limit = Utility.unix_time_millis(first_limit)
             last_limit = Utility.unix_time_millis(last_limit)
 
@@ -222,10 +242,9 @@ class Sqlite_Utility:
             debugs = DebugLog.select().where(DebugLog.user == developers_name)
         else:
             if first_limit is not None and last_limit is None:
-                last_limit = datetime.now()
+                last_limit = Utility.current_time_in_milli()
             first_limit = Utility.unix_time_millis(first_limit)
             last_limit = Utility.unix_time_millis(last_limit)
 
             debugs = DebugLog.select().where((DebugLog.user == developers_name) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
         return self.__generate_verbose_return_payload(debugs)
-

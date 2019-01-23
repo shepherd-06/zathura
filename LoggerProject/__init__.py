@@ -58,18 +58,9 @@ def create_app():
                     logs = sql_utils.get_error_by_origin(origin)
                     print(logs)
                 elif args == "date":
-                    generated_after = input("Enter a date (limit_1): (dd/mm/yyyy format) ")
-                    day, month, year = map(int, generated_after.split('/'))
-                    generated_after = datetime(year, month, day, 0, 0, 0)
-
-                    generated_before = input("Enter a date (limit_2): (dd/mm/yyyy format) ")
-                    if generated_before is None or len(generated_before) == 0:
-                        print("datetime.now() is using")
-                        generated_before = None
-                    else:
-                        day, month, year = map(int, generated_before.split('/'))
-                        generated_before = datetime(year, month, day, 0, 0, 0)
-                    result = sql_utils.get_error_by_date_limit(generated_after, generated_before)
+                    generated_after, generated_before = ask_date()
+                    desc, limit = ask_filter_and_order()
+                    result = sql_utils.get_error_by_date_limit(generated_after, generated_before, limit, desc)
                     print(result)
                 elif args == 'debug_origin':
                     origin = input("Enter <DEBUG> point of origin: ")
