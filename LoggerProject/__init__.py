@@ -8,7 +8,7 @@ from git import Repo
 
 def create_app():
     # It should be hardcode False on production
-    known_commands = ('v', 'insert', 'dev', 'debug_origin', 'get_all', 'user', 'get_debug_all', 'error_name', 'date', 'get_error_all', 'origin')
+    known_commands = ('v', 'insert', 'dev', 'debug_origin', 'user', 'debug_all', 'error_name', 'date', 'error_all', 'origin')
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
@@ -27,25 +27,15 @@ def create_app():
                         print("error inserted test: {}".format(rows))
                         debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
                         print("debug rows added {}".format(debug_rows))
-                elif args == 'get_all':
-                    all_error_logs = sql_utils.get_all_error_log()
-                    all_debug_logs = sql_utils.get_all_debug_log()
-
-                    print("All error logs")
-                    print(all_error_logs)
-                    print("-----------------------------")
-                    print("-----------------------------")
-                    print("All debug logs")
-                    print(all_debug_logs)
-                    print("-----------------------------")
-                    print("-----------------------------")
-                elif args == "get_error_all":
+                elif args == "error_all":
                     print(sql_utils.get_all_error_log())
-                elif args == "get_debug_all":
+                elif args == "debug_all":
                     print(sql_utils.get_all_debug_log())
                 elif args == "error_name":
                     error_name = input("Enter the error_name: ")
-                    result = sql_utils.get_error_by_error_name(error_name)
+                    generated_after, generated_before = ask_date()
+                    desc, limit = ask_filter_and_order()
+                    result = sql_utils.get_error_by_error_name(error_name, generated_after, generated_before, limit, desc)
                     print(result)
                 elif args == "user":
                     user = input("Enter a username: ")

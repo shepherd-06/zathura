@@ -114,7 +114,7 @@ class Sqlite_Utility:
         if len(user) == 0:
             print("Username cannot be empty for this function!")
             return self.empty_result #.order_by()
-        
+        user = user.strip()
         if first_limit is None and last_limit is None: 
             if limit != 0:
                 if desc:
@@ -185,14 +185,57 @@ class Sqlite_Utility:
         return self.__generate_error_return_payload(errors)
 
     # def search by error_name
-    def get_error_by_error_name(self, error_name: str):
+    def get_error_by_error_name(self, error_name: str, first_limit: datetime = None, last_limit: datetime = None, limit: int = 0, desc: bool = False):
+        """
+        searches errors by error name. filters will be applied based on parameter
+        error_name: what's the name of error you want to search under.
+        first_limit: first date limit to be applied
+        last_limit: last date limit to be applied, not inclusive
+        limit: limits the number of data on search result.
+        desc: sort the result in descending order or ascending order. (By default, ascending order)
+        """
         if error_name is None:
             print("Error name cannot be empty on this search")
             return self.empty_result
         if len(error_name) == 0:
             print("Error name cannot be empty on this search")
             return self.empty_result
-        errors = ErrorLog.select().where(ErrorLog.error_name == error_name)
+        error_name = error_name.strip()
+        if first_limit is None and last_limit is None:
+            if limit != 0:
+                if desc:
+                    # search with limit in descending order under no date limit
+                    errors = ErrorLog.select().where(ErrorLog.error_name == error_name).order_by(ErrorLog.logged_at.desc()).limit(limit)
+                else:
+                    # search with limit in ascending order under no date limit
+                    errors = ErrorLog.select().where(ErrorLog.error_name == error_name).limit(limit)
+            else:
+                if desc:
+                    # search without limit in descending order under no date limit
+                    errors = ErrorLog.select().where(ErrorLog.error_name == error_name).order_by(ErrorLog.logged_at.desc())
+                else:
+                    # search without limit in ascending order under no date limit
+                    errors = ErrorLog.select().where(ErrorLog.error_name == error_name)
+        else:
+            # filter under date limit
+            first_limit = Utility.unix_time_millis(first_limit)
+            if last_limit is None:
+                last_limit = Utility.current_time_in_milli()
+            last_limit = Utility.unix_time_millis(last_limit)
+            if limit != 0:
+                if desc:
+                    # search with limit in descending order under date limit
+                    errors = ErrorLog.select().where((ErrorLog.error_name == error_name) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc()).limit(limit)
+                else:
+                    # search with limit in ascending order under date limit
+                    errors = ErrorLog.select().where((ErrorLog.error_name == error_name) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).limit(limit)
+            else:
+                if desc:
+                    # search without limit in descending order under date limit
+                    errors = ErrorLog.select().where((ErrorLog.error_name == error_name) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc())
+                else:
+                    # search without limit in ascending order under date limit
+                    errors = ErrorLog.select().where((ErrorLog.error_name == error_name) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit))
         return self.__generate_error_return_payload(errors)
 
     # def search by point_of_origin
