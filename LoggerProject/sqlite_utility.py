@@ -138,16 +138,45 @@ class Sqlite_Utility:
         return self.__generate_error_return_payload(errors)
 
     # verbose/debug print out
-    def get_debug_by_origin(self, origin: str = ''):
+    def get_debug_by_origin(self, origin: str = '', first_limit: datetime = None, last_limit: datetime = None):
+        """
+        returns all debug data filters by origin; if neededd.
+        first_limit: datetime filters out data before this limit
+        last_limit: datetime filters out data after this limit
+        origin: str point of origin of any debug msg that needs to be on this list.
+        """
         if len(origin) == 0:
-            print("You are running blank search on sql")
-        debugs = DebugLog.select().where(DebugLog.point_of_origin == origin.lower())
+            return self.get_all_debug_log()
+
+        if first_limit is None and last_limit is None:
+            debugs = DebugLog.select().where(DebugLog.point_of_origin == origin.lower())
+        else:
+            if first_limit is not None and last_limit is None:
+                last_limit = datetime.now()
+            first_limit = Utility.unix_time_millis(first_limit)
+            last_limit = Utility.unix_time_millis(last_limit)
+
+            debugs = DebugLog.select().where((DebugLog.point_of_origin == origin.lower()) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
         return self.__generate_verbose_return_payload(debugs)
 
     # verbose/debug search by developers name
-    def get_debug_by_developers(self, developers_name: str = ''):
+    def get_debug_by_developers(self, developers_name: str = '', first_limit: datetime = None, last_limit: datetime = None):
+        """
+        returns all debug data filters by developers; if neededd.
+        first_limit: datetime filters out data before this limit
+        last_limit: datetime filters out data after this limit
+        developers_name: str developers_name : who wrote the debug message. For debugging person. Could be None or empty string.
+        """
         if len(developers_name) == 0:
-            print("You are running blank search on sql")
-        debugs = DebugLog.select().where(DebugLog.user == developers_name)
+            return self.get_all_debug_log()
+        if first_limit is None and last_limit is None:
+            debugs = DebugLog.select().where(DebugLog.user == developers_name)
+        else:
+            if first_limit is not None and last_limit is None:
+                last_limit = datetime.now()
+            first_limit = Utility.unix_time_millis(first_limit)
+            last_limit = Utility.unix_time_millis(last_limit)
+
+            debugs = DebugLog.select().where((DebugLog.user == developers_name) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
         return self.__generate_verbose_return_payload(debugs)
 
