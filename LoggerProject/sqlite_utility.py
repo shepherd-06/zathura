@@ -8,7 +8,7 @@ class Sqlite_Utility:
     def __init__(self, *args, **kwargs):
         # TODO: should check if database is already connected or not.
         database_connection()  # initiate database connection before doing anything. 
-        self.empty_result = {"total": 0, "log": []}
+        self.empty_result = {'error': True}
 
     def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str):
         if user is not None and error_name is not None and error_description is not None and point_of_origin is not None:
@@ -48,12 +48,12 @@ class Sqlite_Utility:
 
     def __error_obj_to_dict(self, error_log_object: ErrorLog):
         return {
-            '_id': error_log_object._id,
+            # '_id': error_log_object._id,
             'user': error_log_object.user,
             'error_name': error_log_object.error_name,
             'error_description': error_log_object.error_description,
             'point_of_origin': error_log_object.point_of_origin,
-            'logged_at': error_log_object.logged_at,
+            'logged_at': Utility.milli_to_datetime(error_log_object.logged_at),
             'is_resolved': error_log_object.is_resolved,
             'resolved_at': error_log_object.resolved_at,
         }
@@ -64,7 +64,7 @@ class Sqlite_Utility:
             "user": debug_log_object.user,
             "message-data": debug_log_object.message_data,
             "point_of_origin": debug_log_object.point_of_origin,
-            "logged_at": debug_log_object.logged_at,
+            "logged_at": Utility.milli_to_datetime(debug_log_object.logged_at),
         }
     
     def __generate_error_return_payload(self, log_paylod: ModelSelect):
@@ -86,21 +86,70 @@ class Sqlite_Utility:
         return {"total": len(all_logs), "log": all_logs}
 
     def get_all_error_log(self):
+        """
         # returns all error_log table data on a list
+        """
         err_logs = ErrorLog.select()
         return self.__generate_error_return_payload(err_logs)
 
     def get_all_debug_log(self):
+        """
         # returns all debug_log table data on a list
+        """
         debug_logs = DebugLog.select()
         return self.__generate_verbose_return_payload(debug_logs)
 
-    def get_error_by_user(self, user: str, limit: int=0, asc:bool = True):
-        # returns error generated for a user
+    def get_error_by_user(self, user: str, limit: int=0, desc:bool = False, first_limit: datetime = None, last_limit: datetime = None):
+        """
+        # returns error generated for a user. datetime is both inclusive.
+        # username is mandatory in this case.
+        # asceding order is by default otherwise.
+        # ordering is when the error is logged.
+        user: str error report generated under a particular user
+        limit: int limits the number of error searchable
+        desc: bool whether to show the result in ascending or descending order
+        first_limit: datetime shows result after this limit
+        last_limit: shows result before this limit
+        """
         if len(user) == 0:
             print("Username cannot be empty for this function!")
-            return self.empty_result
-        errors = ErrorLog.select().where(ErrorLog.user == user)
+            return self.empty_result #.order_by()
+        
+        if first_limit is None and last_limit is None: 
+            if limit != 0:
+                if desc:
+                    # descending order with limit
+                    errors = ErrorLog.select().where(ErrorLog.user == user).order_by(ErrorLog.logged_at.desc()).limit(limit)
+                else:
+                    # ascending order with limit
+                    errors = ErrorLog.select().where(ErrorLog.user == user).limit(limit)
+            else:
+                if desc:
+                    # descending order without limit
+                    errors = ErrorLog.select().where(ErrorLog.user == user).order_by(ErrorLog.logged_at.desc())
+                else:
+                    # ascending order without limit
+                    errors = ErrorLog.select().where(ErrorLog.user == user)
+        else:
+            # filter by datetime. and same limit order
+            first_limit = Utility.unix_time_millis(first_limit)
+            if last_limit is None:
+                last_limit = datetime.now()
+            last_limit = Utility.unix_time_millis(last_limit)
+            if limit != 0:
+                if desc:
+                    # descending order with limit date filter included
+                    errors = ErrorLog.select().where((ErrorLog.user == user) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc()).limit(limit)
+                else:
+                    # ascending order without limit date filter included
+                    errors = ErrorLog.select().where((ErrorLog.user == user) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).limit(limit)
+            else:
+                if desc:
+                    # descending order without limit date filter included
+                    errors = ErrorLog.select().where((ErrorLog.user == user) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc())
+                else:
+                    # ascending order without limit date filter included
+                    errors = ErrorLog.select().where((ErrorLog.user == user) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit))
         return self.__generate_error_return_payload(errors)
 
     def get_error_by_date_limit(self, beginning_limit: datetime, ending_limit: datetime = datetime.now(), limit:int = 0, asc: bool = True):

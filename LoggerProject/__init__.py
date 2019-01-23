@@ -49,7 +49,9 @@ def create_app():
                     print(result)
                 elif args == "user":
                     user = input("Enter a username: ")
-                    logs = sql_utils.get_error_by_user(user)
+                    generated_after, generated_before = ask_date()
+                    desc, limit = ask_filter_and_order()
+                    logs = sql_utils.get_error_by_user(user, limit, desc, generated_after, generated_before)
                     print(logs)
                 elif args == 'origin':
                     origin = input("Enter point of origin: ")
@@ -83,6 +85,28 @@ def create_app():
                 print("unknown command - {}".format(args))
                 print("All commands - {}".format(known_commands))
                 break
+
+def ask_filter_and_order():
+    desc = input("Do you want to filter the result in descending order? Press 1 to confirm, Press any key to continue ")
+    if desc == '1':
+        desc = True
+    else:
+        desc = False
+
+    while True:
+        limit = input("Do you want to limit the result? Print out the number. Number must be non-zero. Press Enter to skip ")
+        try:
+            if len(limit) == 0:
+                return (desc, 0)
+            limit = int(limit)
+            if limit < 1:
+                print("Limit must be greater than or equal to 1")
+            else:
+                return (desc, limit)
+        except:
+            pass
+        
+
     
 def ask_date():
     generated_after = input("Show logs after this date (inclusive) (limit_1): (dd/mm/yyyy format) ")
