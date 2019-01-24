@@ -28,56 +28,56 @@ def create_app():
                         debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
                         print("debug rows added {}".format(debug_rows))
                 elif args == "error_all":
-                    print(sql_utils.get_all_error_log())
+                    print_stuff_nice_and_good(sql_utils.get_all_error_log(), "All Error logs")
                 elif args == "debug_all":
-                    print(sql_utils.get_all_debug_log())
+                    print_stuff_nice_and_good(sql_utils.get_all_debug_log(), "All Debug messages")
                 elif args == "error_name":
                     error_name = input("Enter the error_name: ")
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
                     result = sql_utils.get_error_by_error_name(error_name, generated_after, generated_before, limit, desc)
-                    print(result)
+                    print_stuff_nice_and_good(result, "Errors based on error name", generated_after, generated_before, limit, desc, error_name)
                 elif args == "user":
                     user = input("Enter a username: ")
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
                     logs = sql_utils.get_error_by_user(user, limit, desc, generated_after, generated_before)
-                    print(logs)
+                    print_stuff_nice_and_good(logs, "Errors based on user", generated_after, generated_before, limit, desc, user)
                 elif args == 'origin':
                     origin = input("Enter point of origin: ")
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
                     logs = sql_utils.get_error_by_origin(origin, generated_after, generated_before, limit, desc)
-                    print(logs)
+                    print_stuff_nice_and_good(logs, "Errors based on origin function/class", generated_after, generated_before, limit, desc, origin)
                 elif args == "date":
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
                     result = sql_utils.get_error_by_date_limit(generated_after, generated_before, limit, desc)
-                    print(result)
+                    print_stuff_nice_and_good(result, "Errors between a date frame", generated_after, generated_before, limit, desc)
                 elif args == 'debug_origin':
                     origin = input("Enter <DEBUG> point of origin: ")
                     generated_after, generated_before = ask_date()
                     verbose = sql_utils.get_debug_by_origin(origin, generated_after, generated_before)
-                    print(verbose)
+                    print_stuff_nice_and_good(verbose, "Debug messages based on origin function/class", generated_after, generated_before, search_criteria=origin)
                 elif args == 'dev':
                     dev = input("Enter the developers name: ")
                     generated_after, generated_before = ask_date()
                     verbose = sql_utils.get_debug_by_developers(dev, generated_after, generated_before)
-                    print(verbose)
+                    print_stuff_nice_and_good(verbose, "Debug messages based on developers name", generated_after, generated_before, search_criteria=dev)
             else:
                 print("unknown command - {}".format(args))
                 print("All commands - {}".format(known_commands))
                 break
 
 def ask_filter_and_order():
-    desc = input("Do you want to filter the result in descending order? Press 1 to confirm, Press any key to continue ")
+    desc = input("Do you want to filter the result in descending order? Press 1 to confirm, Press any key to continue: ")
     if desc == '1':
         desc = True
     else:
         desc = False
 
     while True:
-        limit = input("Do you want to limit the result? Print out the number. Number must be non-zero. Press Enter to skip ")
+        limit = input("Do you want to limit the result? Print out the number. Number must be non-zero. Press Enter to skip: ")
         try:
             if len(limit) == 0:
                 return (desc, 0)
@@ -92,7 +92,7 @@ def ask_filter_and_order():
 
     
 def ask_date():
-    generated_after = input("Show logs after this date (inclusive) (limit_1): (dd/mm/yyyy format) ")
+    generated_after = input("Show logs after this date (inclusive) (limit_1): (dd/mm/yyyy format): ")
     if generated_after is None or len(generated_after) == 0:
         print("No date filter then")
         return (None, None)
@@ -100,7 +100,7 @@ def ask_date():
         day, month, year = map(int, generated_after.split('/'))
         generated_after = datetime(year, month, day, 0, 0, 0)
 
-        generated_before = input("Show logs before this date (inclusive) (limit_2): (dd/mm/yyyy format) ")
+        generated_before = input("Show logs before this date (inclusive) (limit_2): (dd/mm/yyyy format): ")
         if generated_before is None or len(generated_before) == 0:
             print("Current date will be using")
             generated_before = None
@@ -109,3 +109,57 @@ def ask_date():
             generated_before = datetime(year, month, day, 0, 0, 0)
         
         return (generated_after, generated_before)
+
+
+def print_stuff_nice_and_good(payload:dict, message: str = None, date_filter_after: datetime = None, date_filter_before: datetime = None, limit: int = 0, desc: bool = False, search_criteria: str = None):
+    """
+    print stuff in cute and functional way for now.
+    payload: dict the payload you just received from the sqlite_utility file
+    message: str any extra message you want to add?
+    """
+    os.system('clear')
+    if payload is None:
+        return
+    total = payload['total'] if 'total'in payload else None
+    if total is None:
+        return
+    logs = payload['log'] if 'log' in payload else None 
+    if logs is None:
+        return
+
+    print('--------------------------------------------------------')
+    print('--------------------------------------------------------')
+    if message is not None:
+        print(message)
+    if search_criteria is not None:
+        print("Search Criteria: {}".format(search_criteria))
+    if date_filter_after is not None:
+        _ = "Generated from: {}".format(date_filter_after.strftime(Utility.get_print_timeformat()))
+        if date_filter_before is not None:
+            _ += " to {}".format(date_filter_before.strftime(Utility.get_print_timeformat()))
+        print(_)
+    
+    if limit != 0:
+        print("Total result is limited into {}".format(limit))
+
+    if desc:
+        print("Result is in descending order")
+    else:
+        print("Result is in ascending order")
+    print('--------------------------------------------------------')
+    print("Logs found = {}".format(total))
+    print('--------------------------------------------------------\n')
+
+    for log in logs:
+        if 'error_name' in log:
+            print("User: [[ {} ]] | Error: [[ {} ]] | logged at: {} | Originated at [[ {} ]]".format(log['user'], log['error_name'], log['logged_at'], log['point_of_origin']))
+            print("Error Description: {}".format(log['error_description']))
+            if log['is_resolved']:
+                print("Status: Resolved. Resolved at {}".format(log['resolved_at']))
+            else:
+                print("Status: Not Resolved yet")
+            print('--------------------------------------------------------\n')
+        else:
+            print("Developer: [[ {} ]] | logged at: {} | Location: [[ {} ]]".format(log['user'], log['logged_at'], log['point_of_origin']))
+            print("Message: {}".format( log['message-data']))
+            print('--------------------------------------------------------\n')

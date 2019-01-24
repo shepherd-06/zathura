@@ -5,6 +5,10 @@ class Utility:
     def get_timeformat():
         return '%A, %d %B, %Y at %H:%M:%S.%f'
     
+    @staticmethod
+    def get_print_timeformat():
+        return '%A, %d %B, %Y at 12 AM'
+    
     # lamda function
     current_time_in_milli = lambda: int(round(time() * 1000))
 

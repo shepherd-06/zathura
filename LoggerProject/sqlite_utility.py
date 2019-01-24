@@ -147,7 +147,8 @@ class Sqlite_Utility:
             first_limit = Utility.unix_time_millis(first_limit)
             if last_limit is None:
                 last_limit = Utility.current_time_in_milli()
-            last_limit = Utility.unix_time_millis(last_limit)
+            else:
+                last_limit = Utility.unix_time_millis(last_limit)
             param_user = (ErrorLog.user == user)
             param_date_filter_one = (ErrorLog.logged_at >= first_limit)
             param_date_filter_two = (ErrorLog.logged_at <= last_limit)
@@ -179,10 +180,11 @@ class Sqlite_Utility:
             result = self.empty_result
             result['message'] = "Please insert the first date to search after a specific time."
             return result
+        first_limit = Utility.unix_time_millis(beginning_limit)
         if ending_limit is None:
             ending_limit = Utility.current_time_in_milli()
-        first_limit = Utility.unix_time_millis(beginning_limit)
-        last_limit = Utility.unix_time_millis(ending_limit)
+        else:
+            last_limit = Utility.unix_time_millis(ending_limit)
 
         param_filter_one = (ErrorLog.logged_at >= first_limit)
         param_filter_two = (ErrorLog.logged_at <= last_limit)
@@ -238,7 +240,8 @@ class Sqlite_Utility:
             first_limit = Utility.unix_time_millis(first_limit)
             if last_limit is None:
                 last_limit = Utility.current_time_in_milli()
-            last_limit = Utility.unix_time_millis(last_limit)
+            else:
+                last_limit = Utility.unix_time_millis(last_limit)
 
             param_filter_one = (ErrorLog.error_name == error_name)
             param_filter_two = (ErrorLog.logged_at >= first_limit)
@@ -293,7 +296,10 @@ class Sqlite_Utility:
                     errors = ErrorLog.select().where(ErrorLog.point_of_origin == origin)
         else:
             first_limit = Utility.unix_time_millis(first_limit)
-            last_limit = Utility.unix_time_millis(last_limit)
+            if last_limit is None:
+                last_limit = Utility.current_time_in_milli()
+            else:
+                last_limit = Utility.unix_time_millis(last_limit)
             filter_param_one = (ErrorLog.point_of_origin == origin)
             filter_param_two = (ErrorLog.logged_at >= first_limit)
             filter_param_three = (ErrorLog.logged_at <= last_limit)
@@ -329,10 +335,11 @@ class Sqlite_Utility:
         if first_limit is None and last_limit is None:
             debugs = DebugLog.select().where(DebugLog.point_of_origin == origin.lower())
         else:
+            first_limit = Utility.unix_time_millis(first_limit)
             if first_limit is not None and last_limit is None:
                 last_limit = Utility.current_time_in_milli()
-            first_limit = Utility.unix_time_millis(first_limit)
-            last_limit = Utility.unix_time_millis(last_limit)
+            else:
+                last_limit = Utility.unix_time_millis(last_limit)
 
             debugs = DebugLog.select().where((DebugLog.point_of_origin == origin.lower()) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
         return self.__generate_verbose_return_payload(debugs)
@@ -349,9 +356,10 @@ class Sqlite_Utility:
         if first_limit is None and last_limit is None:
             debugs = DebugLog.select().where(DebugLog.user == developers_name)
         else:
+            first_limit = Utility.unix_time_millis(first_limit)    
             if first_limit is not None and last_limit is None:
                 last_limit = Utility.current_time_in_milli()
-            first_limit = Utility.unix_time_millis(first_limit)
-            last_limit = Utility.unix_time_millis(last_limit)
+            else:
+                last_limit = Utility.unix_time_millis(last_limit)
             debugs = DebugLog.select().where((DebugLog.user == developers_name) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
         return self.__generate_verbose_return_payload(debugs)
