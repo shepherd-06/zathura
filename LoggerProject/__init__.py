@@ -45,7 +45,9 @@ def create_app():
                     print(logs)
                 elif args == 'origin':
                     origin = input("Enter point of origin: ")
-                    logs = sql_utils.get_error_by_origin(origin)
+                    generated_after, generated_before = ask_date()
+                    desc, limit = ask_filter_and_order()
+                    logs = sql_utils.get_error_by_origin(origin, generated_after, generated_before, limit, desc)
                     print(logs)
                 elif args == "date":
                     generated_after, generated_before = ask_date()

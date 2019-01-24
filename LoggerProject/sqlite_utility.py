@@ -249,15 +249,58 @@ class Sqlite_Utility:
                     errors = ErrorLog.select().where((ErrorLog.error_name == error_name) & (ErrorLog.logged_at >= first_limit) & (ErrorLog.logged_at <= last_limit))
         return self.__generate_error_return_payload(errors)
 
-    # def search by point_of_origin
-    def get_error_by_origin(self, origin: str):
+    def get_error_by_origin(self, origin: str, first_limit: datetime= None, last_limit: datetime = None, limit:int = 0, desc:bool = False):
+        """
+        # searches error by point of origin, where the error is originated when the error is logged.
+        # But you better catch the error with an except block. and manually register it. 
+        origin: str name of the function or class
+        first_limit: datetime first date limit for filtering purpose
+        last_limit: datetime last date limit to filter out 
+        limit: int limits the amount of returned result.
+        desc: bool filter the data in descending order (Ascending is by default)
+        """
         if origin is None:
             print("Point of origin cannot be None")
             return self.empty_result
         if len(origin) == 0:
             print("Point of origin cannot be None")
             return self.empty_result
-        errors = ErrorLog.select().where(ErrorLog.point_of_origin == origin.lower())
+        origin = origin.strip()
+
+        if first_limit is None and last_limit is None:
+            if limit != 0:
+                # search with limit and no date limit applied
+                if desc:
+                    # show result in descending order with limit but no date filter
+                    errors = ErrorLog.select().where(ErrorLog.point_of_origin == origin.lower()).order_by(ErrorLog.logged_at.desc()).limit(limit)
+                else:
+                    # show result in ascending order with limit but no date filter
+                    errors = ErrorLog.select().where(ErrorLog.point_of_origin == origin.lower()).limit(limit)
+            else:
+                if desc:
+                    # show result in descending order without limit but no date filter
+                    errors = ErrorLog.select().where(ErrorLog.point_of_origin == origin.lower()).order_by(ErrorLog.logged_at.desc())
+                else:
+                    # show result in ascending order without but no date filter
+                    errors = ErrorLog.select().where(ErrorLog.point_of_origin == origin.lower())
+        else:
+            first_limit = Utility.unix_time_millis(first_limit)
+            last_limit = Utility.unix_time_millis(last_limit)
+            if limit != 0:
+                # search with limit and no date limit applied
+                if desc:
+                    # show result in descending order with limit WITH date filter
+                    errors = ErrorLog.select().where((ErrorLog.point_of_origin == origin.lower()) & (ErrorLog.logged_at >= first_limit) &(ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc()).limit(limit)
+                else:
+                    # show result in ascending order with limit WITH date filter
+                    errors = ErrorLog.select().where((ErrorLog.point_of_origin == origin.lower()) & (ErrorLog.logged_at >= first_limit) &(ErrorLog.logged_at <= last_limit)).limit(limit)
+            else:
+                if desc:
+                    # show result in descending order without limit WITH date filter
+                    errors = ErrorLog.select().where((ErrorLog.point_of_origin == origin.lower()) & (ErrorLog.logged_at >= first_limit) &(ErrorLog.logged_at <= last_limit)).order_by(ErrorLog.logged_at.desc())
+                else:
+                    # show result in ascending order without WITH date filter
+                    errors = ErrorLog.select().where((ErrorLog.point_of_origin == origin.lower()) & (ErrorLog.logged_at >= first_limit) &(ErrorLog.logged_at <= last_limit))
         return self.__generate_error_return_payload(errors)
 
     # verbose/debug print out
