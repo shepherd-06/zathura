@@ -94,11 +94,21 @@ class Sqlite_Utility:
             all_logs.append(self.__debug_obj_to_dict(log))
         return {"total": len(all_logs), "log": all_logs}
 
-    def get_all_error_log(self):
+    def get_all_error_log(self, show_all: bool = False, desc: bool = False):
         """
-        # returns all error_log table data on a list
+        # returns all error_log table data on a list which are not resolved yet
+        show_all: bool filters out the is_resolved = True value if show_all is False
         """
-        err_logs = ErrorLog.select()
+        if show_all:
+            if desc: 
+                err_logs = ErrorLog.select().order_by(ErrorLog.logged_at.desc())
+            else:
+                err_logs = ErrorLog.select()
+        else:
+            if desc:
+                err_logs = ErrorLog.select().where(ErrorLog.is_resolved != True).order_by(ErrorLog.logged_at.desc())
+            else:
+                err_logs = ErrorLog.select().where(ErrorLog.is_resolved != True)
         return self.__generate_error_return_payload(err_logs)
 
     def get_all_debug_log(self):

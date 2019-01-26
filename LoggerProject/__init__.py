@@ -25,7 +25,12 @@ def create_app():
                         debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
                         print("debug rows added {}".format(debug_rows))
                 elif args == "error_all":
-                    print_stuff_nice_and_good(sql_utils.get_all_error_log(), "All Error logs")
+                    filter_resolved = input("Press 1 to see all errors, including resolved, any key for others: ")
+                    desc = ask_filter_and_order(ask_limit=False)  # filters data in descending order based on logged_at time.
+                    if filter_resolved == '1':
+                        print_stuff_nice_and_good(sql_utils.get_all_error_log(show_all = True, desc = desc), "All Error logs")
+                    else:
+                        print_stuff_nice_and_good(sql_utils.get_all_error_log(desc = desc), "All Error logs")
                 elif args == "debug_all":
                     print_stuff_nice_and_good(sql_utils.get_all_debug_log(), "All Debug messages")
                 elif args == "error_name":
@@ -83,25 +88,28 @@ def get_current_version():
     else:
         return None
 
-def ask_filter_and_order():
+def ask_filter_and_order(ask_limit = True):
     desc = input("Do you want to filter the result in descending order? Press 1 to confirm, Press any key to continue: ")
     if desc == '1':
         desc = True
     else:
         desc = False
 
-    while True:
-        limit = input("Do you want to limit the result? Print out the number. Number must be non-zero. Press Enter to skip: ")
-        try:
-            if len(limit) == 0:
-                return (desc, 0)
-            limit = int(limit)
-            if limit < 1:
-                print("Limit must be greater than or equal to 1")
-            else:
-                return (desc, limit)
-        except:
-            pass
+    if ask_limit:
+        while True:
+            limit = input("Do you want to limit the result? Print out the number. Number must be non-zero. Press Enter to skip: ")
+            try:
+                if len(limit) == 0:
+                    return (desc, 0)
+                limit = int(limit)
+                if limit < 1:
+                    print("Limit must be greater than or equal to 1")
+                else:
+                    return (desc, limit)
+            except:
+                pass
+    else:
+        return desc
         
 
     
