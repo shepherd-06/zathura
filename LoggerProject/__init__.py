@@ -8,7 +8,7 @@ from git import Repo
 
 def create_app():
     # It should be hardcode False on production
-    known_commands = ('v', 'insert', 'dev', 'debug_origin', 'user', 'debug_all', 'error_name', 'date', 'error_all', 'origin')
+    known_commands = ('v', 'insert_test', 'dev_user', 'debug_origin', 'error_user', 'debug_all', 'error_name', 'date', 'error_all', 'origin', 'mark_resolve')
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
@@ -21,7 +21,7 @@ def create_app():
                         print(tags[-1])
                     else:
                         print("ERROR! version name not found.")
-                elif args == 'insert':
+                elif args == 'insert_test':
                     for i in range(0, 10):
                         rows = sql_utils.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=create_app.__name__)
                         print("error inserted test: {}".format(rows))
@@ -59,11 +59,16 @@ def create_app():
                     generated_after, generated_before = ask_date()
                     verbose = sql_utils.get_debug_by_origin(origin, generated_after, generated_before)
                     print_stuff_nice_and_good(verbose, "Debug messages based on origin function/class", generated_after, generated_before, search_criteria=origin)
-                elif args == 'dev':
+                elif args == 'dev_user':
                     dev = input("Enter the developers name: ")
                     generated_after, generated_before = ask_date()
                     verbose = sql_utils.get_debug_by_developers(dev, generated_after, generated_before)
                     print_stuff_nice_and_good(verbose, "Debug messages based on developers name", generated_after, generated_before, search_criteria=dev)
+                elif args == 'mark_resolve':
+                    error_name = input("Please provide error name: ")
+                    origin = input("Please provide point of origin: ")
+                    result = sql_utils.mark_resolve(error_name, origin)
+                    print("Number of modified rows {}".format(result))
             else:
                 print("unknown command - {}".format(args))
                 print("All commands - {}".format(known_commands))
@@ -154,7 +159,7 @@ def print_stuff_nice_and_good(payload:dict, message: str = None, date_filter_aft
         if 'error_name' in log:
             print("User: [[ {} ]] | Error: [[ {} ]] | logged at: {} | Originated at [[ {} ]]".format(log['user'], log['error_name'], log['logged_at'], log['point_of_origin']))
             print("Error Description: {}".format(log['error_description']))
-            if log['is_resolved']:
+            if log['is_resolved'] == "Resolved":
                 print("Status: Resolved. Resolved at {}".format(log['resolved_at']))
             else:
                 print("Status: Not Resolved yet")

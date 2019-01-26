@@ -55,14 +55,13 @@ class Sqlite_Utility:
         error_log_object: ErrorLog a ErrorLog object
         """
         return {
-            # '_id': error_log_object._id,
             'user': error_log_object.user,
             'error_name': error_log_object.error_name,
             'error_description': error_log_object.error_description,
             'point_of_origin': error_log_object.point_of_origin,
             'logged_at': Utility.milli_to_datetime(error_log_object.logged_at),
-            'is_resolved': error_log_object.is_resolved,
-            'resolved_at': error_log_object.resolved_at,
+            'is_resolved': "Resolved" if error_log_object.is_resolved else "Not Resolved",  
+            'resolved_at': error_log_object.resolved_at if error_log_object.resolved_at is None else Utility.milli_to_datetime(error_log_object.resolved_at),
         }
 
     def __debug_obj_to_dict(self, debug_log_object: DebugLog):
@@ -71,7 +70,6 @@ class Sqlite_Utility:
         debug_log_object: DebugLog a DebugLog object
         """
         return {
-            # "_id": debug_log_object._id,
             "user": debug_log_object.user,
             "message-data": debug_log_object.message_data,
             "point_of_origin": debug_log_object.point_of_origin,
@@ -363,3 +361,26 @@ class Sqlite_Utility:
                 last_limit = Utility.unix_time_millis(last_limit)
             debugs = DebugLog.select().where((DebugLog.user == developers_name) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
         return self.__generate_verbose_return_payload(debugs)
+
+    def mark_resolve(self, error_name: str, origin: str):
+        """
+        # Mark resolved some errors
+        error_name: str the error name u want to mark as resolved.
+        origin: str point of origin of this particular error.
+        they are both necessary
+        """
+        result = self.empty_result
+        if error_name is None or len(error_name) == 0:
+            result['message'] = "missing error name!"
+            return result
+        if origin is None or len(origin) == 0:
+            result['message'] = 'missing error origin!'
+            return result
+        
+        filter_one = (ErrorLog.error_name == error_name)
+        filter_two = (ErrorLog.point_of_origin == origin)
+        filter_three = (ErrorLog.is_resolved != True)
+        query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two & filter_three))
+        result = query.execute()
+        return result
+        
