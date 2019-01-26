@@ -1,0 +1,6 @@
+https://www.python.org/dev/peps/pep-0508/
+versioning = https://packaging.python.org/specifications/core-metadata/#metadata-version
+Packaging Python Project = https://packaging.python.org/tutorials/packaging-projects/
+TestPyPi = https://packaging.python.org/guides/using-testpypi/
+Twine = https://pypi.org/project/twine/
+https://python-packaging.readthedocs.io/en/latest/minimal.html

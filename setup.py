@@ -3,12 +3,12 @@ from setuptools import setup
 with open('LoggerProject/requirements.txt') as fp:
     install_requires = fp.read()
 
-setup(name='LoggerProject',
-      version='0.0.0.1+git',
+setup(name='Logbook',
+      version='0.2',
       description='Hello World',
       url='https://github.com/ibtehaz-shawon/LoggerProject',
       author='Ibtehaz Shawon',
-      author_email='ibtehaz.shawon@gmail.com',
+      author_email='ibtehaz.92@gmail.com',
       license='MIT',
       packages=['LoggerProject'],
       install_requires=[
@@ -16,7 +16,7 @@ setup(name='LoggerProject',
       ],
       entry_points={
         'console_scripts': [
-            'LoggerP = LoggerProject.__init__:create_app'
+            'Logbook = LoggerProject.__init__:create_app'
         ]
         },
       zip_safe=False)

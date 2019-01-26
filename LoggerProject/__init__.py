@@ -4,7 +4,8 @@ import time
 from datetime import datetime
 from .sqlite_utility import Sqlite_Utility
 from .utility import Utility
-from git import Repo
+
+CURRENT_VERSION = '0.2'
 
 def create_app():
     # It should be hardcode False on production
@@ -16,8 +17,7 @@ def create_app():
                 sql_utils = Sqlite_Utility()
                 if args == 'v':
                     # TODO: is not gonna work for pip project.
-                    if get_current_version() is None:
-                        print("ERROR! version name not found.")
+                    print(CURRENT_VERSION)
                 elif args == 'insert_test':
                     for i in range(0, 10):
                         rows = sql_utils.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=create_app.__name__)
@@ -78,15 +78,15 @@ def create_app():
                 print("All commands - {}".format(known_commands))
                 break
     else:
-        get_current_version()
+        print(CURRENT_VERSION)
         
-def get_current_version():
-    repo = Repo(os.getcwd())
-    if repo.tags is not None:
-        tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-        print(tags[-1])
-    else:
-        return None
+# def get_current_version():
+#     repo = Repo(os.getcwd())
+#     if repo.tags is not None:
+#         tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+#         print(tags[-1])
+#     else:
+#         return None
 
 def ask_filter_and_order(ask_limit = True):
     desc = input("Do you want to filter the result in descending order? Press 1 to confirm, Press any key to continue: ")
