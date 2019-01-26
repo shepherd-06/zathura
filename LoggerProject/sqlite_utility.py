@@ -384,3 +384,12 @@ class Sqlite_Utility:
         result = query.execute()
         return result
         
+    def delete_old_debug(self):
+        from datetime import timedelta
+        limit = (datetime.now() - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
+        print("Deleting record older than {}".format(limit.strftime('%A, %d %B, %Y')))
+        today = Utility.unix_time_millis(limit)
+        delete_stuff = DebugLog.delete().where(DebugLog.logged_at < today)
+        result = delete_stuff.execute()
+
+        print("Deleted {} debug entries".format(result))

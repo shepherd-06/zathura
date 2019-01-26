@@ -8,7 +8,7 @@ from git import Repo
 
 def create_app():
     # It should be hardcode False on production
-    known_commands = ('v', 'insert_test', 'dev_user', 'debug_origin', 'error_user', 'debug_all', 'error_name', 'date', 'error_all', 'origin', 'mark_resolve')
+    known_commands = ('v', 'insert_test', 'dev_user', 'debug_origin', 'error_user', 'debug_all', 'error_name', 'date', 'error_all', 'origin', 'mark_resolve', 'delete_debug')
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
@@ -16,7 +16,6 @@ def create_app():
                 sql_utils = Sqlite_Utility()
                 if args == 'v':
                     # TODO: is not gonna work for pip project.
-                    repo = Repo(os.getcwd())
                     if get_current_version() is None:
                         print("ERROR! version name not found.")
                 elif args == 'insert_test':
@@ -67,6 +66,8 @@ def create_app():
                     origin = input("Please provide point of origin: ")
                     result = sql_utils.mark_resolve(error_name, origin)
                     print("Number of modified rows {}".format(result))
+                elif args == 'delete_debug':
+                    sql_utils.delete_old_debug()
             else:
                 print("unknown command - {}".format(args))
                 print("All commands - {}".format(known_commands))
