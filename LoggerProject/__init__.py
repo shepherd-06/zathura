@@ -15,11 +15,9 @@ def create_app():
                 print("Current argument: {}".format(args))
                 sql_utils = Sqlite_Utility()
                 if args == 'v':
+                    # TODO: is not gonna work for pip project.
                     repo = Repo(os.getcwd())
-                    if repo.tags is not None:
-                        tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-                        print(tags[-1])
-                    else:
+                    if get_current_version() is None:
                         print("ERROR! version name not found.")
                 elif args == 'insert_test':
                     for i in range(0, 10):
@@ -73,6 +71,16 @@ def create_app():
                 print("unknown command - {}".format(args))
                 print("All commands - {}".format(known_commands))
                 break
+    else:
+        get_current_version()
+        
+def get_current_version():
+    repo = Repo(os.getcwd())
+    if repo.tags is not None:
+        tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+        print(tags[-1])
+    else:
+        return None
 
 def ask_filter_and_order():
     desc = input("Do you want to filter the result in descending order? Press 1 to confirm, Press any key to continue: ")
