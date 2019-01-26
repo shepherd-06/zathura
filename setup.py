@@ -1,10 +1,10 @@
 from setuptools import setup
 
-with open('LoggerProject/requirements.txt') as fp:
+with open('requirements.txt') as fp:
     install_requires = fp.read()
 
-setup(name='Logbook',
-      version='0.2',
+setup(name='Logbook',  # alternative name docket
+      version='0.4',
       description='Hello World',
       url='https://github.com/ibtehaz-shawon/LoggerProject',
       author='Ibtehaz Shawon',
@@ -19,4 +19,9 @@ setup(name='Logbook',
             'Logbook = LoggerProject.__init__:create_app'
         ]
         },
+       classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        ],
       zip_safe=False)
