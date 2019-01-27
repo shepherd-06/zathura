@@ -2,7 +2,7 @@ from peewee import SqliteDatabase, Model, UUIDField, CharField, TextField, CharF
 from playhouse.migrate import SqliteMigrator, migrate
 from datetime import datetime
 from uuid import uuid4
-from DocketProject.utility import Utility
+from ZathuraProject.utility import Utility
 
 db = SqliteDatabase('logger.db')
 migrator = SqliteMigrator(db)

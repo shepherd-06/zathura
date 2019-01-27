@@ -1,7 +1,7 @@
 from uuid import uuid4
-from DocketProject.sqlite_definition import ErrorLog, DebugLog, database_connection
+from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection
 from datetime import datetime
-from DocketProject.utility import Utility
+from ZathuraProject.utility import Utility
 from peewee import ModelSelect
 
 class Sqlite_Utility:
