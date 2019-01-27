@@ -6,10 +6,10 @@ from ZathuraProject.sqlite_utility import Sqlite_Utility
 from ZathuraProject.utility import Utility
 
 CURRENT_VERSION = 'v0.7-Alpha'
+known_commands = ('v', 'insert', 'developer', 'debug_origin', 'error_user', 'all_debug', 'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
+
 
 def create_app():
-    # It should be hardcode False on production
-    known_commands = ('v', 'insert_test', 'dev_user', 'debug_origin', 'error_user', 'debug_all', 'error_name', 'date', 'error_all', 'origin', 'mark_resolve', 'delete_debug')
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
@@ -18,20 +18,25 @@ def create_app():
                 if args == 'v':
                     # TODO: is not gonna work for pip project.
                     print(CURRENT_VERSION)
-                elif args == 'insert_test':
+                elif args == 'insert':
+                    print('[[[[[ For developers only. Skipping now ]]]]]'.upper())
+                    command_man()
+                    import time
                     for i in range(0, 10):
                         rows = sql_utils.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=create_app.__name__)
                         print("error inserted test: {}".format(rows))
+                        time.sleep(1)
                         debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
                         print("debug rows added {}".format(debug_rows))
-                elif args == "error_all":
+                        time.sleep(1)
+                elif args == "all_error":
                     filter_resolved = input("Press 1 to see all errors, including resolved, any key for others: ")
                     desc = ask_filter_and_order(ask_limit=False)  # filters data in descending order based on logged_at time.
                     if filter_resolved == '1':
                         print_stuff_nice_and_good(sql_utils.get_all_error_log(show_all = True, desc = desc), "All Error logs")
                     else:
                         print_stuff_nice_and_good(sql_utils.get_all_error_log(desc = desc), "All Error logs")
-                elif args == "debug_all":
+                elif args == "all_debug":
                     print_stuff_nice_and_good(sql_utils.get_all_debug_log(), "All Debug messages")
                 elif args == "error_name":
                     error_name = input("Enter the error_name: ")
@@ -61,7 +66,7 @@ def create_app():
                     generated_after, generated_before = ask_date()
                     verbose = sql_utils.get_debug_by_origin(origin, generated_after, generated_before)
                     print_stuff_nice_and_good(verbose, "Debug messages based on origin function/class", generated_after, generated_before, search_criteria=origin)
-                elif args == 'dev_user':
+                elif args == 'developer':
                     dev = input("Enter the developers name: ")
                     generated_after, generated_before = ask_date()
                     verbose = sql_utils.get_debug_by_developers(dev, generated_after, generated_before)
@@ -73,9 +78,11 @@ def create_app():
                     print("Number of modified rows {}".format(result))
                 elif args == 'delete_debug':
                     sql_utils.delete_old_debug()
+                elif args == 'help':
+                    command_man()
             else:
                 print("unknown command - {}".format(args))
-                print("All commands - {}".format(known_commands))
+                command_man()
                 break
     else:
         print(CURRENT_VERSION)
@@ -177,3 +184,36 @@ def print_stuff_nice_and_good(payload:dict, message: str = None, date_filter_aft
             print("Developer: [[ {} ]] | logged at: {} | Location: [[ {} ]]".format(log['user'], log['logged_at'], log['point_of_origin']))
             print("Message: {}".format( log['message-data']))
             print('--------------------------------------------------------\n')
+
+def command_man():
+    """
+    This is command manual. This will print out the helper function of this command.
+    """
+    helper = {
+        'v': 'Show the current version of this package',
+        'insert': 'This is for testing purpose only. I use it insert dummy data on the sqlite database',
+        'developer': 'Search based on developers name. You can filter out the result based on date and descending order',
+        'debug_origin': 'Shows debug messages based on point of origin. Point of origin is the class/function from where you are adding a message in sqlite.',
+        'all_debug': 'Shows all debug messages',
+        'delete_debug':'Deletes the last seven days of debug mesasges from the database. It is useful if you dont want to clutter the database with unnecessary debug info.',
+        'all_error': 'Shows all error messages',
+        'error_name': 'Shows error based on a error name.',
+        'date': 'Shows error occurred in between a specific date.',
+        'error_user': 'Shows error generated under the given username',
+        'origin': 'Shows error generated on the given point of origin',
+        'mark_resolve': 'Given an error name and point of origin all errors logged on database, is marked resolved.',
+        'help': 'Shows all the commands necessary to run this package from terminal',
+    }
+    print('usage: Zathura COMMAND [args] ...')
+    print('For example: { Zathura v } will show the current version of this pacakge.')
+    print('-----------------------------------------------------')
+    print('-----------------------------------------------------')
+    print("All commands: ")
+    for commands in known_commands:
+        print('[[ {} ]] : {}'.format(commands, helper[commands]))
+    print('-----------------------------------------------------')
+    print('-----------------------------------------------------')
+
+
+if __name__ == '__main__':
+    create_app()

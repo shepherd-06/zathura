@@ -8,7 +8,7 @@ class Sqlite_Utility:
     def __init__(self, *args, **kwargs):
         # TODO: should check if database is already connected or not.
         database_connection()  # initiate database connection before doing anything. 
-        self.empty_result = {'error': True} # TODO: Able to add error message here.
+        self.empty_result = {'error': True}
 
     def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str):
         """
