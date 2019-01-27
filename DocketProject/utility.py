@@ -1,5 +1,6 @@
 from time import time
 from datetime import datetime
+
 class Utility:
     @staticmethod
     def get_timeformat():

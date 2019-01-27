@@ -2,10 +2,10 @@ import os
 import sys
 import time
 from datetime import datetime
-from .sqlite_utility import Sqlite_Utility
-from .utility import Utility
+from DocketProject.sqlite_utility import Sqlite_Utility
+from DocketProject.utility import Utility
 
-CURRENT_VERSION = '0.2'
+CURRENT_VERSION = 'v0.5-Alpha'
 
 def create_app():
     # It should be hardcode False on production
@@ -94,7 +94,13 @@ def ask_filter_and_order(ask_limit = True):
         desc = True
     else:
         desc = False
-
+  
+# def get_current_version():
+#     repo = Repo(os.getcwd())
+#     if repo.tags is not None:
+#         tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+#         print(tags[-1])
+#     else:
     if ask_limit:
         while True:
             limit = input("Do you want to limit the result? Print out the number. Number must be non-zero. Press Enter to skip: ")
