@@ -5,7 +5,7 @@ from datetime import datetime
 from DocketProject.sqlite_utility import Sqlite_Utility
 from DocketProject.utility import Utility
 
-CURRENT_VERSION = 'v0.5-Alpha'
+CURRENT_VERSION = 'v0.6-Alpha'
 
 def create_app():
     # It should be hardcode False on production
