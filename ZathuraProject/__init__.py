@@ -20,14 +20,14 @@ def create_app():
                 elif args == 'insert':
                     print('[[[[[ For developers only. Skipping now ]]]]]'.upper())
                     command_man()
-                    import time
-                    for i in range(0, 10):
-                        rows = sql_utils.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=create_app.__name__)
-                        print("error inserted test: {}".format(rows))
-                        time.sleep(1)
-                        debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
-                        print("debug rows added {}".format(debug_rows))
-                        time.sleep(1)
+                    # import time
+                    # for i in range(0, 10):
+                    #     rows = sql_utils.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=create_app.__name__)
+                    #     print("error inserted test: {}".format(rows))
+                    #     time.sleep(1)
+                    #     debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
+                    #     print("debug rows added {}".format(debug_rows))
+                    #     time.sleep(1)
                 elif args == "all_error":
                     filter_resolved = input("Press 1 to see all errors, including resolved, any key for others: ")
                     desc = ask_filter_and_order(ask_limit=False)  # filters data in descending order based on logged_at time.
