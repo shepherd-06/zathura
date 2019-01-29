@@ -2,19 +2,18 @@ import os
 import sys
 import time
 from datetime import datetime
-from ZathuraProject.sqlite_utility import Sqlite_Utility
+from ZathuraProject.zathura import Zathura
 from ZathuraProject.utility import Utility
 
 CURRENT_VERSION = 'v0.7-Alpha'
 known_commands = ('v', 'insert', 'developer', 'debug_origin', 'error_user', 'all_debug', 'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
-
 
 def create_app():
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
                 print("Current argument: {}".format(args))
-                sql_utils = Sqlite_Utility()
+                sql_utils = Zathura()
                 if args == 'v':
                     # TODO: is not gonna work for pip project.
                     print(CURRENT_VERSION)

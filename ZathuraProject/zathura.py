@@ -4,7 +4,7 @@ from datetime import datetime
 from ZathuraProject.utility import Utility
 from peewee import ModelSelect
 
-class Sqlite_Utility:
+class Zathura:
     def __init__(self, *args, **kwargs):
         # TODO: should check if database is already connected or not.
         database_connection()  # initiate database connection before doing anything. 
@@ -12,7 +12,7 @@ class Sqlite_Utility:
 
     def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str):
         """
-        # Inserts error log on a sqlite db
+        Inserts error log on a sqlite db
         """
         if user is not None and error_name is not None and error_description is not None and point_of_origin is not None:
             from uuid import uuid4
