@@ -161,7 +161,7 @@ def print_stuff_nice_and_good(payload:dict, message: str = None, date_filter_aft
         print(_)
     
     if limit != 0:
-        print("Total result is limited into {}".format(limit))
+        print("Total result is limited to {} data only".format(limit))
 
     if desc:
         print("Result is in descending order")

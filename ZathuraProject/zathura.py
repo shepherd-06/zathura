@@ -22,7 +22,12 @@ class Zathura:
         if user is not None and error_name is not None and error_description is not None and point_of_origin is not None:
             from uuid import uuid4
             try:
-                error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin.lower(), warning_level=int(warning))
+                warning = int(warning)
+                if warning < 0:
+                    warning = 0
+                elif warning > 3:
+                    warning = 3
+                error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin.lower(), warning_level=warning)
             except ValueError:
                 # TODO: add logger 
                 print("Wrong warning field value")
@@ -74,7 +79,7 @@ class Zathura:
             'logged_at': Utility.milli_to_datetime(error_log_object.logged_at),
             'is_resolved': "Resolved" if error_log_object.is_resolved else "Not Resolved",  
             'resolved_at': error_log_object.resolved_at if error_log_object.resolved_at is None else Utility.milli_to_datetime(error_log_object.resolved_at),
-            'warning_level': error_log_object.warning_level,
+            'warning_level': self.__get_warning_level_in_text(error_log_object.warning_level),
         }
 
     def __debug_obj_to_dict(self, debug_log_object: DebugLog):
@@ -97,6 +102,15 @@ class Zathura:
         for err in log_paylod:
             all_error_logs.append(self.__error_obj_to_dict(err))
         return {"total": len(all_error_logs), "log": all_error_logs}
+
+    def __get_warning_level_in_text(self, warning_level: int):
+        _ = {
+            '0': 'warning',
+            '1': 'Level - 1',
+            '2': 'Level - 2',
+            '3': 'Critical'
+        }
+        return _[str(warning_level)]
 
     def __generate_verbose_return_payload(self, debug_payload: ModelSelect):
         """
