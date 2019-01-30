@@ -16,6 +16,7 @@ class ErrorLog(Model):
     logged_at = IntegerField(default=Utility.current_time_in_milli())
     is_resolved = BooleanField(default=False)
     resolved_at = IntegerField(null=True)
+    warning_level = IntegerField(default=0)
 
     class Meta:
         database = db

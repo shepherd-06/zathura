@@ -32,9 +32,9 @@ install_requires = [
 ]
 
 
-setup(name='Zathura',
+setup(name='zathura',
       packages = ['ZathuraProject'],
-      version='0.7.4.dev1',
+      version='0.0.2.dev1',
       description='Zathura is a small space logger. It logs stuff into her logbook as she drifts into vast unknown of development phase.',
       url='https://github.com/ibtehaz-shawon/Zathura',
       author='Ibtehaz Shawon',
@@ -45,7 +45,7 @@ setup(name='Zathura',
       ],
       entry_points={
         'console_scripts': [
-            'Zathura = ZathuraProject.zathura:create_app'
+            'zathura = ZathuraProject.__init__:create_app'
         ]
         },
        classifiers=[
