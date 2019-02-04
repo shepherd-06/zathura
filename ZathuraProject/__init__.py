@@ -7,10 +7,14 @@ from datetime import datetime
 from ZathuraProject.utility import Utility
 from ZathuraProject.zathura import Zathura
 
-CURRENT_VERSION = 'v0.0.2-dev1'
+CURRENT_VERSION = 'v0.0.3-dev6'
 known_commands = ('v', 'insert', 'developer', 'debug_origin', 'error_user', 'all_debug', 'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
 
 def create_app():
+    if sys.version_info < (3, 0, 0):
+        print("Zathura needs python3.x to perform normally!")
+        sys.exit(255)
+
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:        
             if args in known_commands:
@@ -87,6 +91,7 @@ def create_app():
                 break
     else:
         print(CURRENT_VERSION)
+    return
 
 def ask_filter_and_order(ask_limit = True):
     desc = input("Do you want to filter the result in descending order? Press 1 to confirm, Press any key to continue: ")
@@ -132,7 +137,7 @@ def ask_date():
         return (generated_after, generated_before)
 
 
-def print_stuff_nice_and_good(payload:dict, message: str = None, date_filter_after: datetime = None, date_filter_before: datetime = None, limit: int = 0, desc: bool = False, search_criteria: str = None):
+def print_stuff_nice_and_good(payload:dict, message: str = None, date_filter_after: datetime = None, date_filter_before: datetime = None, limit: int = 0, desc: bool = False, search_criteria:str = None):
     """
     print stuff in cute and functional way for now.
     payload: dict the payload you just received from the sqlite_utility file
@@ -217,4 +222,8 @@ def command_man():
 
 
 if __name__ == '__main__':
-    create_app()
+    if sys.version_info < (3, 0, 0):
+        print("Zathura needs python3.x to perform normally!")
+        sys.exit(255)
+    else:
+        create_app()

@@ -1,8 +1,3 @@
-import os
-import sys
-import time
-from datetime import datetime
-from uuid import uuid4
 from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection
 from datetime import datetime
 from ZathuraProject.utility import Utility
@@ -28,13 +23,13 @@ class Zathura:
                 elif warning > 3:
                     warning = 3
                 error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin.lower(), warning_level=warning)
+                return error_log.save()  # number of modified rows are returned. (Always be 1)
             except ValueError:
                 # TODO: add logger 
                 print("Wrong warning field value")
             except SyntaxError:
                 # TODO: add logger
                 print("Wrong warning field value")
-            return error_log.save()  # number of modified rows are returned. (Always be 1)
             # TODO: for future, log if any errors occurred while storing.
         else:
             if user is None:
@@ -82,7 +77,8 @@ class Zathura:
             'warning_level': self.__get_warning_level_in_text(error_log_object.warning_level),
         }
 
-    def __debug_obj_to_dict(self, debug_log_object: DebugLog):
+    @staticmethod
+    def __debug_obj_to_dict(debug_log_object: DebugLog):
         """
         # generates & returns a dictionary from a DebugLog object.
         debug_log_object: DebugLog a DebugLog object
@@ -103,7 +99,8 @@ class Zathura:
             all_error_logs.append(self.__error_obj_to_dict(err))
         return {"total": len(all_error_logs), "log": all_error_logs}
 
-    def __get_warning_level_in_text(self, warning_level: int):
+    @staticmethod
+    def __get_warning_level_in_text(warning_level: int):
         _ = {
             '0': 'warning',
             '1': 'Level - 1',
@@ -149,7 +146,7 @@ class Zathura:
         """
         # returns error generated for a user. datetime is not both inclusive, exclude the last date.
         # username is mandatory in this case.
-        # asceding order is by default otherwise.
+        # ascending order is by default otherwise.
         # ordering is when the error is logged.
         user: str error report generated under a particular user
         limit: int limits the number of error searchable
@@ -420,8 +417,9 @@ class Zathura:
         query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two & filter_three))
         result = query.execute()
         return result
-        
-    def delete_old_debug(self):
+
+    @staticmethod
+    def delete_old_debug():
         from datetime import timedelta
         limit = (datetime.now() - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
         print("Deleting record older than {}".format(limit.strftime('%A, %d %B, %Y')))

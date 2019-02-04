@@ -13,7 +13,6 @@ peewee==3.8.1
 pkginfo==1.5.0.1
 Pygments==2.3.1
 pylint==2.2.2
-pymongo==3.7.2
 pytz==2018.7
 readme-renderer==24.0
 requests==2.21.0
