@@ -7,7 +7,7 @@ install_requires = [
 
 setup(name='zathura',
       packages = ['ZathuraProject'],
-      version='0.0.3.dev6',
+      version='0.0.3.dev7',
       description='Zathura is a small space logger. It logs stuff into her logbook as she drifts into vast unknown of development phase.',
       url='https://github.com/ibtehaz-shawon/Zathura',
       author='Ibtehaz Shawon',
