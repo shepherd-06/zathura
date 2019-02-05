@@ -7,8 +7,8 @@ from datetime import datetime
 from ZathuraProject.utility import Utility
 from ZathuraProject.zathura import Zathura
 
-CURRENT_VERSION = 'v0.0.3-dev8'
-known_commands = ('v', 'insert', 'developer', 'debug_origin', 'error_user', 'all_debug', 'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
+CURRENT_VERSION = 'v0.0.3-dev9'
+known_commands = ('v', 'developer', 'debug_origin', 'error_user', 'all_debug', 'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
 
 def create_app():
     if sys.version_info < (3, 0, 0):
@@ -23,17 +23,6 @@ def create_app():
                 if args == 'v':
                     # TODO: is not gonna work for pip project.
                     print(CURRENT_VERSION)
-                elif args == 'insert':
-                    print('[[[[[ For developers only. Skipping now ]]]]]'.upper())
-                    command_man()
-                    # import time
-                    # for i in range(0, 10):
-                    #     rows = sql_utils.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=create_app.__name__, warning=2)
-                    #     print("error inserted test: {}".format(rows))
-                    #     time.sleep(1)
-                    #     debug_rows = sql_utils.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=create_app.__name__)
-                    #     print("debug rows added {}".format(debug_rows))
-                    #     time.sleep(1)
                 elif args == "all_error":
                     filter_resolved = input("Press 1 to see all errors, including resolved, any key for others: ")
                     desc = ask_filter_and_order(ask_limit=False)  # filters data in descending order based on logged_at time.
@@ -197,7 +186,6 @@ def command_man():
     """
     helper = {
         'v': 'Show the current version of this package',
-        'insert': 'This is for testing purpose only. I use it insert dummy data on the sqlite database',
         'developer': 'Search based on developers name. You can filter out the result based on date and descending order',
         'debug_origin': 'Shows debug messages based on point of origin. Point of origin is the class/function from where you are adding a message in sqlite.',
         'all_debug': 'Shows all debug messages',
