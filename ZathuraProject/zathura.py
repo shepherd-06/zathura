@@ -72,8 +72,10 @@ class Zathura:
             'error_description': error_log_object.error_description,
             'point_of_origin': error_log_object.point_of_origin,
             'logged_at': Utility.milli_to_datetime(error_log_object.logged_at),
+            'logged_at_unix': error_log_object.logged_at,
             'is_resolved': "Resolved" if error_log_object.is_resolved else "Not Resolved",  
             'resolved_at': error_log_object.resolved_at if error_log_object.resolved_at is None else Utility.milli_to_datetime(error_log_object.resolved_at),
+            'resolved_at_unix': error_log_object.resolved_at,
             'warning_level': self.__get_warning_level_in_text(error_log_object.warning_level),
         }
 
@@ -252,6 +254,7 @@ class Zathura:
             result['message'] = "Error name cannot be empty on this search"
             return result
         error_name = error_name.strip()
+        error_name = error_name.lower()
         if first_limit is None and last_limit is None:
             if limit != 0:
                 if desc:
@@ -269,7 +272,10 @@ class Zathura:
                     errors = ErrorLog.select().where(ErrorLog.error_name == error_name)
         else:
             # filter under date limit
-            first_limit = Utility.unix_time_millis(first_limit)
+            if first_limit is not None:
+                first_limit = Utility.unix_time_millis(first_limit)
+            else:
+                first_limit = Utility.current_time_in_milli()
             if last_limit is None:
                 last_limit = Utility.current_time_in_milli()
             else:
@@ -410,12 +416,14 @@ class Zathura:
         if origin is None or len(origin) == 0:
             result['message'] = 'missing error origin!'
             return result
-        
+
+        error_name = error_name.lower()
         filter_one = (ErrorLog.error_name == error_name)
         filter_two = (ErrorLog.point_of_origin == origin)
         filter_three = (ErrorLog.is_resolved != True)
         query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two & filter_three))
         result = query.execute()
+        print("Result is {} for error name {}".format(result, error_name))
         return result
 
     @staticmethod
