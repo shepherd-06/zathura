@@ -33,7 +33,7 @@ class DebugLog(Model):
 
 def database_connection():
     # Connect to our database.
-    db.connect()
+    db.connect(reuse_if_open=True)
 
     # TODO: handle all migrations commands from here
     # Reference: http://docs.peewee-orm.com/en/latest/peewee/playhouse.html#migrate

@@ -26,7 +26,10 @@ class RunTest:
 
     def self_destruct(self):
         import os
-        os.remove('logger.db')
+        try:
+            os.remove('logger.db')
+        except FileNotFoundError:
+            print("BITE ME!")
 
     
 if __name__ == '__main__':
