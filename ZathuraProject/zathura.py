@@ -1,3 +1,4 @@
+import inspect
 from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection, close_db
 from datetime import datetime
 from ZathuraProject.utility import Utility
@@ -9,11 +10,11 @@ class Zathura:
         # TODO: should check if database is already connected or not.
         self.empty_result = {'error': True}
 
-    def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str, warning:int = 0):
+    def insert_error_log(self, user:str, error_name:str, error_description:str, warning:int = 0):
         """
         Inserts error log on a sqlite db
         """
-        if user is not None and error_name is not None and error_description is not None and point_of_origin is not None:
+        if user is not None and error_name is not None and error_description is not None:
             from uuid import uuid4
             try:
                 warning = int(warning)
@@ -22,6 +23,7 @@ class Zathura:
                     warning = 0
                 elif warning > 3:
                     warning = 3
+                point_of_origin = inspect.stack()[1].function
                 error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin.lower(), warning_level=warning)
                 return error_log.save()  # number of modified rows are returned. (Always be 1)
             except ValueError:
@@ -45,7 +47,7 @@ class Zathura:
             print("unknown error occurred")
             return 0
             
-    def insert_debug_log(self, message_data:str, point_of_origin:str =None,  developer:str = 'Logger_Test_User'):
+    def insert_debug_log(self, message_data:str,  developer:str = 'Logger_Test_User'):
         """
         # Insert debug and verbose logs. Logs will purge after a week.
         # It's not going to print out anything right now.
@@ -56,7 +58,8 @@ class Zathura:
         if message_data is not None:
             from uuid import uuid4
             database_connection()  # initiate database connection before doing anything. 
-            debug_log = DebugLog(_id = str(uuid4()), user=developer, message_data = message_data.lower(), point_of_origin = point_of_origin.lower() if point_of_origin is not None else None)
+            origin = inspect.stack()[1].function
+            debug_log = DebugLog(_id = str(uuid4()), user=developer, message_data = message_data.lower(), point_of_origin = origin)
             close_db()
             return debug_log.save()
         else: 
@@ -438,10 +441,9 @@ class Zathura:
         error_name = error_name.lower()
         filter_one = (ErrorLog.error_name == error_name)
         filter_two = (ErrorLog.point_of_origin == origin)
-        filter_three = (ErrorLog.is_resolved != True)
-        query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two & filter_three))
+        # filter_three = (ErrorLog.is_resolved != True)
+        query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two))
         result = query.execute()
-        print("Result is {} for error name {}".format(result, error_name))
         close_db()
         return result
 
