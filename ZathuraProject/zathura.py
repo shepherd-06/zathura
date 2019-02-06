@@ -1,4 +1,4 @@
-from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection
+from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection, close_db
 from datetime import datetime
 from ZathuraProject.utility import Utility
 from peewee import ModelSelect
@@ -7,7 +7,6 @@ from peewee import ModelSelect
 class Zathura:
     def __init__(self):
         # TODO: should check if database is already connected or not.
-        database_connection()  # initiate database connection before doing anything. 
         self.empty_result = {'error': True}
 
     def insert_error_log(self, user:str, error_name:str, error_description:str, point_of_origin:str, warning:int = 0):
@@ -18,6 +17,7 @@ class Zathura:
             from uuid import uuid4
             try:
                 warning = int(warning)
+                database_connection()  # initiate database connection before doing anything. 
                 if warning < 0:
                     warning = 0
                 elif warning > 3:
@@ -30,6 +30,8 @@ class Zathura:
             except SyntaxError:
                 # TODO: add logger
                 print("Wrong warning field value")
+            finally:
+                close_db()
             # TODO: for future, log if any errors occurred while storing.
         else:
             if user is None:
@@ -53,7 +55,9 @@ class Zathura:
         """
         if message_data is not None:
             from uuid import uuid4
+            database_connection()  # initiate database connection before doing anything. 
             debug_log = DebugLog(_id = str(uuid4()), user=developer, message_data = message_data.lower(), point_of_origin = point_of_origin.lower() if point_of_origin is not None else None)
+            close_db()
             return debug_log.save()
         else: 
             if message_data is None:
@@ -125,6 +129,7 @@ class Zathura:
         # returns all error_log table data on a list which are not resolved yet
         show_all: bool filters out the is_resolved = True value if show_all is False
         """
+        database_connection()  # initiate database connection before doing anything. 
         if show_all:
             if desc: 
                 err_logs = ErrorLog.select().order_by(ErrorLog.logged_at.desc())
@@ -135,13 +140,16 @@ class Zathura:
                 err_logs = ErrorLog.select().where(ErrorLog.is_resolved != True).order_by(ErrorLog.logged_at.desc())
             else:
                 err_logs = ErrorLog.select().where(ErrorLog.is_resolved != True)
+        close_db()
         return self.__generate_error_return_payload(err_logs)
 
     def get_all_debug_log(self):
         """
         # returns all debug_log table data on a list
         """
+        database_connection()  # initiate database connection before doing anything. 
         debug_logs = DebugLog.select()
+        close_db()
         return self.__generate_verbose_return_payload(debug_logs)
 
     def get_error_by_user(self, user: str, limit: int=0, desc:bool = False, first_limit: datetime = None, last_limit: datetime = None):
@@ -161,6 +169,7 @@ class Zathura:
             result['message'] = "Username cannot be empty for this function!"
             return result
         user = user.strip()
+        database_connection()  # initiate database connection before doing anything. 
         if first_limit is None and last_limit is None: 
             if limit != 0:
                 if desc:
@@ -200,6 +209,7 @@ class Zathura:
                 else:
                     # ascending order without limit date filter included
                     errors = ErrorLog.select().where(param_user & param_date_filter_one & param_date_filter_two)
+        close_db()
         return self.__generate_error_return_payload(errors)
 
     def get_error_by_date_limit(self, beginning_limit: datetime, ending_limit: datetime = None, limit:int = 0, desc: bool = False):
@@ -219,7 +229,7 @@ class Zathura:
             ending_limit = Utility.current_time_in_milli()
         else:
             last_limit = Utility.unix_time_millis(ending_limit)
-
+        database_connection()  # initiate database connection before doing anything. 
         param_filter_one = (ErrorLog.logged_at >= first_limit)
         param_filter_two = (ErrorLog.logged_at <= last_limit)
 
@@ -237,6 +247,7 @@ class Zathura:
             else:
                 # search without limit in ascending order
                 errors = ErrorLog.select().where(param_filter_one & param_filter_two)
+        close_db()
         return self.__generate_error_return_payload(errors)
 
     # def search by error_name
@@ -255,6 +266,7 @@ class Zathura:
             return result
         error_name = error_name.strip()
         error_name = error_name.lower()
+        database_connection()  # initiate database connection before doing anything. 
         if first_limit is None and last_limit is None:
             if limit != 0:
                 if desc:
@@ -299,6 +311,7 @@ class Zathura:
                 else:
                     # search without limit in ascending order under date limit
                     errors = ErrorLog.select().where(param_filter_one & param_filter_two & param_filter_three)
+        close_db()
         return self.__generate_error_return_payload(errors)
 
     def get_error_by_origin(self, origin: str, first_limit: datetime= None, last_limit: datetime = None, limit:int = 0, desc:bool = False):
@@ -315,7 +328,7 @@ class Zathura:
             # Point of origin can be None.
             origin = origin.strip()
             origin = origin.lower()
-
+        database_connection()  # initiate database connection before doing anything. 
         if first_limit is None and last_limit is None:
             if limit != 0:
                 # search with limit and no date limit applied
@@ -357,6 +370,7 @@ class Zathura:
                 else:
                     # show result in ascending order without WITH date filter
                     errors = ErrorLog.select().where(filter_param_one & filter_param_two & filter_param_three)
+        close_db()
         return self.__generate_error_return_payload(errors)
 
     def get_debug_by_origin(self, origin: str = '', first_limit: datetime = None, last_limit: datetime = None):
@@ -370,6 +384,7 @@ class Zathura:
             origin = origin.strip()
             origin = origin.lower()
 
+        database_connection()  # initiate database connection before doing anything. 
         if first_limit is None and last_limit is None:
             debugs = DebugLog.select().where(DebugLog.point_of_origin == origin.lower())
         else:
@@ -380,6 +395,7 @@ class Zathura:
                 last_limit = Utility.unix_time_millis(last_limit)
 
             debugs = DebugLog.select().where((DebugLog.point_of_origin == origin.lower()) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
+        close_db()
         return self.__generate_verbose_return_payload(debugs)
 
     def get_debug_by_developers(self, developers_name: str = '', first_limit: datetime = None, last_limit: datetime = None):
@@ -391,6 +407,7 @@ class Zathura:
         """
         if len(developers_name) == 0:
             return self.get_all_debug_log()
+        database_connection()  # initiate database connection before doing anything. 
         if first_limit is None and last_limit is None:
             debugs = DebugLog.select().where(DebugLog.user == developers_name)
         else:
@@ -400,6 +417,7 @@ class Zathura:
             else:
                 last_limit = Utility.unix_time_millis(last_limit)
             debugs = DebugLog.select().where((DebugLog.user == developers_name) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
+        close_db()
         return self.__generate_verbose_return_payload(debugs)
 
     def mark_resolve(self, error_name: str, origin: str):
@@ -416,7 +434,7 @@ class Zathura:
         if origin is None or len(origin) == 0:
             result['message'] = 'missing error origin!'
             return result
-
+        database_connection()  # initiate database connection before doing anything. 
         error_name = error_name.lower()
         filter_one = (ErrorLog.error_name == error_name)
         filter_two = (ErrorLog.point_of_origin == origin)
@@ -424,15 +442,17 @@ class Zathura:
         query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two & filter_three))
         result = query.execute()
         print("Result is {} for error name {}".format(result, error_name))
+        close_db()
         return result
 
     @staticmethod
     def delete_old_debug():
         from datetime import timedelta
+        database_connection()  # initiate database connection before doing anything. 
         limit = (datetime.now() - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
         print("Deleting record older than {}".format(limit.strftime('%A, %d %B, %Y')))
         today = Utility.unix_time_millis(limit)
         delete_stuff = DebugLog.delete().where(DebugLog.logged_at < today)
         result = delete_stuff.execute()
-
+        close_db()
         print("Deleted {} debug entries".format(result))

@@ -3,27 +3,36 @@ from Test.run_test import RunTest
 from ZathuraProject import Zathura
 import unittest
 import time
-
+import random
 
 class TestAll(unittest.TestCase):
 
-    test = RunTest()
-    test.run_error_test()
-    test.run_error_test()
-    test.run_error_test()
-    test.run_debug_test()
-
-    def test_count_error(self):
-        # this will check the insertion as well.
+    def setUp(self):
         zathura = Zathura()
-        all_errors = zathura.get_all_error_log()
-        total = all_errors['total'] if 'total' in all_errors else -1
-        self.assertGreater(total, 0, 'Logger DB is not populated')
+        for i in range(0, 50):
+            error_name = "No error - {}".format(i)
+            rows = zathura.insert_error_log("test123", error_name, "no description", self.test_insertion_boom_boom.__name__, warning=3)
+        for i in range(0, 50):
+            error_name = "No error - {}".format(i)
+            rows = zathura.insert_error_log("test123", error_name, "no description", self.test_insertion_boom_boom.__name__, warning=3)
+        for i in range(0, 50):
+            error_name = "No error - {}".format(i)
+            rows = zathura.insert_error_log("test123", error_name, "no description", self.test_insertion_boom_boom.__name__, warning=3)
+
+    def tearDown(self):
+        RunTest().self_destruct()  # Delete the test db
+
+    def test_insertion_boom_boom(self):
+        zathura = Zathura()
+        counter = 0
+        for i in range(0, 50):
+            error_name = "No error - {}".format(i)
+            rows = zathura.insert_error_log("test123", error_name, "no description", self.test_insertion_boom_boom.__name__, warning=3)
+            counter += rows
+        self.assertEqual(counter, 50, "test insertion - inserted 50 data")
 
     def test_search_by_error_name(self):
         zathura = Zathura()
-        import random
-
         # ----------------------------------------------------------------------
         random_error_name = "No error - {}".format(random.randint(0, 50))
         errors = zathura.get_error_by_error_name(random_error_name)
@@ -119,7 +128,6 @@ class TestAll(unittest.TestCase):
         self.assertEqual(total, 0, 'Random error name came out wrong or something. This must come out False')
 
 
-
     def test_search_by_error_origin(self):
         pass
 
@@ -146,11 +154,38 @@ class TestAll(unittest.TestCase):
     def test_all_error(self):
         # Total 4 major test
         zathura = Zathura()
+        # ----------------------------------------------------------------
+        # Test 1
         all_errors = zathura.get_all_error_log(show_all=True)
+        total = all_errors['total'] if 'total' in all_errors else -1
+        self.assertEqual(total, 150, 'Test all error - Not all value were including in sending all data')
+        # ----------------------------------------------------------------
+
+        # ----------------------------------------------------------------
+        # Test 2
         all_errors = zathura.get_all_error_log(show_all=False, desc=True)
+        total = all_errors['total'] if 'total' in all_errors else -1
+        self.assertNotEqual(total, -1, 'Test all error - Total is not -1')
+        self.assertLessEqual(total, 150, 'Test all error - Total is less than or equal to 150 now')
+        logs = all_errors['log'] if 'log' in all_errors else list()
+        self.assertEqual(len(logs), total, 'Test all error - log entry is not equal to total value')
+        first_logged_at = logs[0]['logged_at_unix']
+        for log in logs: 
+            logged_at = log['logged_at_unix']
+            error_name = log['error_name']
+            self.assertGreaterEqual(first_logged_at, logged_at, 'Test all error - descending is not working right for {}'.format(error_name))
+            first_logged_at = logged_at
+        # ----------------------------------------------------------------
+
+        # ----------------------------------------------------------------
+        # Test 3
         all_errors = zathura.get_all_error_log(show_all=True, desc= True)
+        # ----------------------------------------------------------------
+
+        # ----------------------------------------------------------------
+        # Test 4
         all_errors = zathura.get_all_error_log(show_all=False)
-        pass
+        # ----------------------------------------------------------------
         
 
     def test_all_debug(self):
@@ -161,9 +196,6 @@ class TestAll(unittest.TestCase):
 
     def test_debug_by_origin(self):
         pass
-
-    def test_is_done(self):
-        RunTest().self_destruct()  # Delete the test db
 
 
 if __name__ == '__main__':

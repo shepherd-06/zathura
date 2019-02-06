@@ -44,3 +44,6 @@ def database_connection():
     
     # Create the tables.
     db.create_tables([ErrorLog, DebugLog])
+
+def close_db():
+    db.close()
