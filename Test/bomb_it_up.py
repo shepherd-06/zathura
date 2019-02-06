@@ -8,6 +8,10 @@ import random
 class TestAll(unittest.TestCase):
 
     def database_setup(self):
+        """
+        This function will input random data inside sqlit3 database
+        There will 150 entries each time this function is called.
+        """
         zathura = Zathura()
         counter = 0
         for i in range(0, 50):
@@ -24,10 +28,18 @@ class TestAll(unittest.TestCase):
             counter += rows
 
     def database_teardown(self):
+        """
+        This function will remove the database file.
+        """
         RunTest().self_destruct()  # Delete the test db
 
 
-    def test_insertion_boom_boom(self):
+    def test_insertion(self):
+        """
+        Test insertion inside the database.
+        Setup is done entirely by itself.
+        TODO: this function needs some extensive testing
+        """
         zathura = Zathura()
         counter = 0
         for i in range(0, 50):
@@ -38,6 +50,13 @@ class TestAll(unittest.TestCase):
 
 
     def test_search_by_error_name(self):
+        """
+        Test search by error name. 
+        Every error log inserted into sqlite got an error name, either the exception name or 
+        any other the user (developer) intends to give. 
+        This function will test that.
+        TODO: These test cases were written on a rush. Must do a new check.
+        """
         self.database_teardown()
         self.database_setup()
         zathura = Zathura()
@@ -137,12 +156,68 @@ class TestAll(unittest.TestCase):
 
 
     def test_search_by_error_origin(self):
-        pass
+        """
+        Test search by origin
+        Every error registers on the sqlite3 database, will register 
+        the point of origin (caller function). 
+        It will check if that function works properly
+        """
+        self.database_teardown()
+        self.database_setup()
+        zathura = Zathura()
+        origin = self.test_search_by_error_origin.__name__
+        
+        # ---------------------------------------------------------
+        # Test 1 - Plain search by origin name
+        errors = zathura.get_error_by_origin(origin)
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Test 2 - Origin name + first date limit
+        first_date = datetime.now() - timedelta(days=random.randint(1, 30))
+        errors = zathura.get_error_by_origin(origin, first_limit=first_date)
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Test 3 - origin name + first date limit, limit
+        first_date = datetime.now() - timedelta(days=random.randint(1, 30))
+        limit = random.randint(1, 149)
+        errors = zathura.get_error_by_origin(origin, first_limit= first_date, limit= limit, desc= True)
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Test 4 - origin name + first date limit, limit, descending
+        first_date = datetime.now() - timedelta(days=random.randint(1, 30))
+        limit = random.randint(1, 149)
+        errors = zathura.get_error_by_origin(origin, first_limit= first_date, limit= limit, desc= True)
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Test 5 - origin name + first date, last date
+        first_date = datetime.now() - timedelta(days=random.randint(1, 30))
+        last_date = datetime.now() + timedelta(days=random.randint(0, 30))
+        errors = zathura.get_error_by_origin(origin, first_limit= first_date, last_limit=last_date)
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Test 6 - origin name + first date, last date, limit, descending
+        first_date = datetime.now() - timedelta(days=random.randint(1, 30))
+        last_date = datetime.now() + timedelta(days=random.randint(0, 30))
+        limit = random.randint(1, 149)
+        errors = zathura.get_error_by_origin(origin, first_limit= first_date, last_limit=last_date, limit=limit, desc=True)
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Test 7 - search by wrong origin name
+        errors = zathura.get_error_by_origin("kljisksknnkshs")
+        # ---------------------------------------------------------
 
     def test_search_in_between_dates(self):
         pass
 
     def test_mark_resolve(self):
+        """
+        """
         self.database_teardown()
         self.database_setup()
         zathura = Zathura()
@@ -163,9 +238,9 @@ class TestAll(unittest.TestCase):
         
 
     def test_all_error(self):
+        """
+        """
         # Total 4 major test
-        self.database_teardown()
-        self.database_setup()
         zathura = Zathura()
         # ----------------------------------------------------------------
         # Test 1

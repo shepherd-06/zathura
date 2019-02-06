@@ -3,7 +3,7 @@ from setuptools import setup
 install_requires = [
     'peewee',
 ]
-
+# https://the-hitchhikers-guide-to-packaging.readthedocs.io/en/latest/specification.html
 
 setup(name='zathura',
       packages = ['ZathuraProject'],
