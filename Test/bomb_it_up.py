@@ -170,6 +170,15 @@ class TestAll(unittest.TestCase):
         # ---------------------------------------------------------
         # Test 1 - Plain search by origin name
         errors = zathura.get_error_by_origin(origin)
+        logs = errors['log'] if 'log' in errors else list()
+        total = errors['total'] if 'total' in errors else -1
+        self.assertNotEqual(len(logs), 0, 'logs are empty! It cant be!')
+        self.assertEqual(len(logs), total, 'log length and total value not matching matching')
+        self.assertLessEqual(total, 1, "there is noooo value inside logs or db")
+        for log in logs:
+            log_origin = log['point_of_origin']
+            self.assertEquals(log_origin, origin, 'origin did not match! WOT WOT @.o')
+        print("------------------")
         # ---------------------------------------------------------
 
         # ---------------------------------------------------------
@@ -212,6 +221,7 @@ class TestAll(unittest.TestCase):
         errors = zathura.get_error_by_origin("kljisksknnkshs")
         # ---------------------------------------------------------
 
+
     def test_search_in_between_dates(self):
         pass
 
@@ -239,6 +249,8 @@ class TestAll(unittest.TestCase):
 
     def test_all_error(self):
         """
+        Tests search all error against no filter or is_resolved filter on
+        This function is moderately stable right now
         """
         # Total 4 major test
         zathura = Zathura()
