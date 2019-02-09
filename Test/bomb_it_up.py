@@ -7,11 +7,13 @@ import random
 
 class TestAll(unittest.TestCase):
 
-    def database_setup(self):
+    @classmethod
+    def setUpClass(self):
         """
         This function will input random data inside sqlit3 database
         There will 150 entries each time this function is called.
         """
+        RunTest().self_destruct()  # Just in case
         zathura = Zathura()
         counter = 0
         for i in range(0, 50):
@@ -26,13 +28,6 @@ class TestAll(unittest.TestCase):
             error_name = "No error - {}".format(i)
             rows = zathura.insert_error_log("test123", error_name, "no description", warning=3)
             counter += rows
-
-    def database_teardown(self):
-        """
-        This function will remove the database file.
-        """
-        RunTest().self_destruct()  # Delete the test db
-
 
     def test_insertion(self):
         """
@@ -57,8 +52,6 @@ class TestAll(unittest.TestCase):
         This function will test that.
         TODO: These test cases were written on a rush. Must do a new check.
         """
-        self.database_teardown()
-        self.database_setup()
         zathura = Zathura()
         # ----------------------------------------------------------------------
         random_error_name = "No error - {}".format(random.randint(0, 50))
@@ -162,10 +155,9 @@ class TestAll(unittest.TestCase):
         the point of origin (caller function). 
         It will check if that function works properly
         """
-        self.database_teardown()
-        self.database_setup()
         zathura = Zathura()
-        origin = self.test_search_by_error_origin.__name__
+        origin = self.setUpClass.__name__
+        origin = origin.lower()
         
         # ---------------------------------------------------------
         # Test 1 - Plain search by origin name
@@ -174,11 +166,11 @@ class TestAll(unittest.TestCase):
         total = errors['total'] if 'total' in errors else -1
         self.assertNotEqual(len(logs), 0, 'logs are empty! It cant be!')
         self.assertEqual(len(logs), total, 'log length and total value not matching matching')
-        self.assertLessEqual(total, 1, "there is noooo value inside logs or db")
+        
         for log in logs:
             log_origin = log['point_of_origin']
-            self.assertEquals(log_origin, origin, 'origin did not match! WOT WOT @.o')
-        print("------------------")
+            if log_origin != self.test_insertion.__name__:        
+                self.assertEqual(log_origin, origin, 'origin did not match! WOT WOT @.o')
         # ---------------------------------------------------------
 
         # ---------------------------------------------------------
@@ -225,11 +217,14 @@ class TestAll(unittest.TestCase):
     def test_search_in_between_dates(self):
         pass
 
+
     def test_mark_resolve(self):
         """
+        Randomly mark resolves multiple errors to check
+        if they are already marked resolved, generates an error.
+        if not, they are marked and good to go.
         """
-        self.database_teardown()
-        self.database_setup()
+        # self.database_setup()
         zathura = Zathura()
         import random
         all_errors = zathura.get_all_error_log()
@@ -239,9 +234,21 @@ class TestAll(unittest.TestCase):
             do_or_not_do = int(random.randint(100, 1000)) % 7
             if do_or_not_do == 0:
                 # mark it resolved.
-                result = zathura.mark_resolve("No error - {}".format(_), 'database_setup')
+                error_name = "No error - {}".format(_)
+                origin = self.setUpClass.__name__
+                result = zathura.mark_resolve(error_name, origin)
                 if isinstance(result, int):
-                    status = True if result > 0 else False
+                    if result > 0:
+                        status = True
+                    else:
+                        particular_error = zathura.get_error_by_error_name("No error - {}".format(_))
+                        print(particular_error)
+                        particular_log = particular_error['log'] if 'log' in particular_error else list()
+                        is_resolved = particular_log[0]['is_resolved'] if 'is_resolved' in particular_log[0] else None
+                        if is_resolved == 'Resolved':
+                            status = True
+                        else:
+                            status = False
                 else:
                     status = False
                 self.assertTrue(status, 'Mark Resolve: came False for {}'.format("No error - {}".format(_)))
@@ -258,7 +265,7 @@ class TestAll(unittest.TestCase):
         # Test 1
         all_errors = zathura.get_all_error_log(show_all=True)
         total = all_errors['total'] if 'total' in all_errors else -1
-        self.assertEqual(total, 150, 'Test all error - Not all value were including in sending all data')
+        self.assertGreaterEqual(total, 150, 'Test all error - Not all value were including in sending all data')
         # ----------------------------------------------------------------
 
         # ----------------------------------------------------------------
@@ -266,7 +273,7 @@ class TestAll(unittest.TestCase):
         all_errors = zathura.get_all_error_log(show_all=False, desc=True)
         total = all_errors['total'] if 'total' in all_errors else -1
         self.assertNotEqual(total, -1, 'Test all error - Total is not -1')
-        self.assertLessEqual(total, 150, 'Test all error - Total is less than or equal to 150 now')
+        self.assertGreaterEqual(total, 150, 'Test all error - Total is less than or equal to 150 now')
         logs = all_errors['log'] if 'log' in all_errors else list()
         self.assertEqual(len(logs), total, 'Test all error - log entry is not equal to total value')
         first_logged_at = logs[0]['logged_at_unix']
@@ -310,7 +317,6 @@ class TestAll(unittest.TestCase):
             self.assertIsNone(resolved_at, "Is resolved should be None here!")
         # ----------------------------------------------------------------
         
-        
 
     def test_all_debug(self):
         pass
@@ -321,6 +327,9 @@ class TestAll(unittest.TestCase):
     def test_debug_by_origin(self):
         pass
 
+    @classmethod
+    def tearDownClass(cls):
+        RunTest().self_destruct()
 
 if __name__ == '__main__':
     unittest.main()

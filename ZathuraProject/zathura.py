@@ -438,11 +438,12 @@ class Zathura:
             result['message'] = 'missing error origin!'
             return result
         database_connection()  # initiate database connection before doing anything. 
-        error_name = error_name.lower()
+        error_name = error_name.strip().lower()
+        origin = origin.strip().lower()
         filter_one = (ErrorLog.error_name == error_name)
         filter_two = (ErrorLog.point_of_origin == origin)
-        # filter_three = (ErrorLog.is_resolved != True)
-        query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two))
+        filter_three = (ErrorLog.is_resolved != True)
+        query = (ErrorLog.update({ErrorLog.is_resolved: True, ErrorLog.resolved_at: Utility.current_time_in_milli()}).where(filter_one & filter_two & filter_three))
         result = query.execute()
         close_db()
         return result

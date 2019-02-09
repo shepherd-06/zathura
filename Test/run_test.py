@@ -12,7 +12,7 @@ class RunTest:
         import time
         counter = 0
         for i in range(0, 50):
-            rows = self.zathura.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", point_of_origin=self.run_error_test.__name__, warning=2)
+            rows = self.zathura.insert_error_log(user="test123", error_name="No error - {}".format(i), error_description="no description", warning=2)
             counter += rows
         print("Inserted {} dummy error data.".format(counter))
     
@@ -20,7 +20,7 @@ class RunTest:
         import time
         counter = 0
         for i in range(0, 50):
-            debug_rows = self.zathura.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i), point_of_origin=self.run_debug_test.__name__)
+            debug_rows = self.zathura.insert_debug_log(developer="test123", message_data="eiuhsodfdf bkisdjsdf jsbjlsdfd - {}".format(i))
             counter += debug_rows
         print("Inserted {} dummy debug data.".format(counter))
 
@@ -29,7 +29,7 @@ class RunTest:
         try:
             os.remove('logger.db')
         except FileNotFoundError:
-            print("BITE ME!")
+            pass
 
     
 if __name__ == '__main__':
