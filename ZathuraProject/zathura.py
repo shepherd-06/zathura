@@ -1,5 +1,5 @@
 import inspect
-from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection, close_db
+from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection, close_db, database_start
 from datetime import datetime
 from ZathuraProject.utility import Utility
 from peewee import ModelSelect

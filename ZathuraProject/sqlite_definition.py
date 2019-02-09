@@ -7,6 +7,10 @@ from ZathuraProject.utility import Utility
 db = SqliteDatabase('logger.db')
 migrator = SqliteMigrator(db)
 
+def database_start(database_name = 'logger.db'):
+    db = SqliteDatabase(database_name)
+    migrator = SqliteMigrator(db)
+
 class ErrorLog(Model):
     _id = UUIDField(unique=True, primary_key = False, default=str(uuid4()))
     user = CharField(null=False, max_length=40)
@@ -33,7 +37,11 @@ class DebugLog(Model):
 
 def database_connection():
     # Connect to our database.
-    db.connect(reuse_if_open=True)
+    if db is not None:
+        db.connect(reuse_if_open=True)
+    else:
+        database_start()
+        db.connect(reuse_if_open=True)
 
     # TODO: handle all migrations commands from here
     # Reference: http://docs.peewee-orm.com/en/latest/peewee/playhouse.html#migrate
@@ -46,4 +54,5 @@ def database_connection():
     db.create_tables([ErrorLog, DebugLog])
 
 def close_db():
-    db.close()
+    if db is not None:
+        db.close()

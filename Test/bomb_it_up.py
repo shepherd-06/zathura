@@ -135,13 +135,15 @@ class TestAll(unittest.TestCase):
         # ----------------------------------------------------------------------
         # Test Six - First datetime, last datelimit, descending, limit
         random_error_name = "No error - {}".format(random.randint(0, 50))
-        _datetime_limit = datetime.now() - timedelta(days=1)
+        _datetime_limit = datetime.now() - timedelta(days=2)
         _last_date = datetime.now() + timedelta(days=1)
         errors = zathura.get_error_by_error_name(random_error_name, first_limit=_datetime_limit, last_limit=_last_date, desc=True, limit=2)
         _logs = errors['log'] if 'log' in errors else list()
         _logged_at_index_zero = datetime.fromtimestamp(int(_logs[0]['logged_at_unix']) / 1000)
+        
         total = errors['total'] if 'total' in errors else -1
         self.assertEqual(total, 2, 'Search by name, first date limit, last date limit, descending order and limit: Limit did not work.')
+        
         # Test Three - first datelimit and ascending
         for log in _logs:
             _logged_at = datetime.fromtimestamp(int(log['logged_at_unix']) / 1000)
