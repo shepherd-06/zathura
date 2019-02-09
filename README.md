@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ibtehaz-shawon/zathura.svg?branch=master)](https://travis-ci.org/ibtehaz-shawon/zathura)
+
 Hello World command: How to run: [From the virtualenv]
 
 <ol>
