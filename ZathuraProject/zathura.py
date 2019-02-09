@@ -229,7 +229,7 @@ class Zathura:
             return result
         first_limit = Utility.unix_time_millis(beginning_limit)
         if ending_limit is None:
-            ending_limit = Utility.current_time_in_milli()
+            last_limit = Utility.current_time_in_milli()
         else:
             last_limit = Utility.unix_time_millis(ending_limit)
         database_connection()  # initiate database connection before doing anything. 

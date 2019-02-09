@@ -29,7 +29,15 @@ class TestAll(unittest.TestCase):
             rows = zathura.insert_error_log("test123", error_name, "no description", warning=3)
             counter += rows
 
-    def test_insertion(self):
+        # Insert debug data
+        for i in range(0, 50):
+            rows = zathura.insert_debug_log("Test")
+        
+        for i in range(0, 50):
+            rows = zathura.insert_debug_log("Test")
+
+
+    def test_error_insertion(self):
         """
         Test insertion inside the database.
         Setup is done entirely by itself.
@@ -169,7 +177,7 @@ class TestAll(unittest.TestCase):
         
         for log in logs:
             log_origin = log['point_of_origin']
-            if log_origin != self.test_insertion.__name__:        
+            if log_origin != self.test_error_insertion.__name__:        
                 self.assertEqual(log_origin, origin, 'origin did not match! WOT WOT @.o')
         # ---------------------------------------------------------
 
@@ -215,7 +223,117 @@ class TestAll(unittest.TestCase):
 
 
     def test_search_in_between_dates(self):
-        pass
+        """
+        Tests search in between date (first limit and last limit)
+        if last limit is not present datetime.now() is not present.
+        """
+        zathura = Zathura()
+
+        # ------------------------------------------------------
+        # Test 1 - Test with date only
+        _before = datetime.now() - timedelta(days=7)
+        _after = datetime.now() + timedelta(days=1)
+        errors = zathura.get_error_by_date_limit(_before, _after)
+        
+        total = errors['total'] if 'total' in errors else -1
+        logs = errors['log'] if 'log' in errors else list()
+
+        self.assertNotEqual(total, -1, "key 'total' is not present inside 'errors' dict")
+        self.assertNotEqual(total, 0, "database is not populated yet!")
+        self.assertEqual(total, len(logs), "Length of all logs and total did not match!")
+        _logged_at_index_zero = logs[0]
+        _logged_at_index_zero = _logged_at_index_zero['logged_at_unix'] if 'logged_at_unix' in _logged_at_index_zero else None
+        _logged_at_index_zero = datetime.fromtimestamp(int(_logged_at_index_zero) / 1000)
+        for log in logs:
+            _logged_at = datetime.fromtimestamp(int(log['logged_at_unix']) / 1000)
+            self.assertGreaterEqual(_logged_at_index_zero, _logged_at, 'Searchc by name, first date limit, last date limit, descending order: order did not work')
+            _logged_at_index_zero = _logged_at        
+        # ------------------------------------------------------
+
+        # ------------------------------------------------------
+        # Test 5 - Test with first limit only
+        _before = datetime.now() - timedelta(days=1)
+        errors = zathura.get_error_by_date_limit(_before)
+        
+        total = errors['total'] if 'total' in errors else -1
+        logs = errors['log'] if 'log' in errors else list()
+        self.assertNotEqual(total, -1, "key 'total' is not present inside 'errors' dict")
+        self.assertNotEqual(total, 0, "database is not populated yet!")
+        self.assertEqual(total, len(logs), "Length of all logs and total did not match!")
+        _logged_at_index_zero = logs[0]
+        _logged_at_index_zero = _logged_at_index_zero['logged_at_unix'] if 'logged_at_unix' in _logged_at_index_zero else None
+        _logged_at_index_zero = datetime.fromtimestamp(int(_logged_at_index_zero) / 1000)
+        for log in logs:
+            _logged_at = datetime.fromtimestamp(int(log['logged_at_unix']) / 1000)
+            self.assertGreaterEqual(_logged_at_index_zero, _logged_at, 'Searchc by name, first date limit, last date limit, descending order: order did not work')
+            _logged_at_index_zero = _logged_at   
+        # ------------------------------------------------------
+
+        # ------------------------------------------------------
+        # Test 6 - Test destined to come empty
+        _before = datetime.now() + timedelta(days=7)
+        _after = datetime.now() + timedelta(days=14)
+        errors = zathura.get_error_by_date_limit(_before)
+        
+        total = errors['total'] if 'total' in errors else -1
+        logs = errors['log'] if 'log' in errors else list()
+        self.assertNotEqual(total, -1, "key 'total' is not present inside 'errors' dict")
+        self.assertEqual(total, 0, "list is supposed to be empty here now")
+        self.assertEqual(total, len(logs), "Length of all logs and total did not match!")
+        # ------------------------------------------------------
+
+        # ------------------------------------------------------
+        # Test 2 - Test with date, descending
+        _before = datetime.now() - timedelta(days=3)
+        _after = datetime.now()
+        errors = zathura.get_error_by_date_limit(_before, _after, desc=True)
+        
+        total = errors['total'] if 'total' in errors else -1
+        logs = errors['log'] if 'log' in errors else list()
+        self.assertNotEqual(total, -1, "key 'total' is not present inside 'errors' dict")
+        self.assertNotEqual(total, 0, "list is not supposed to be empty here now")
+        self.assertEqual(total, len(logs), "Length of all logs and total did not match!")
+
+        _logged_at_index_zero = logs[0]
+        _logged_at_index_zero = _logged_at_index_zero['logged_at_unix'] if 'logged_at_unix' in _logged_at_index_zero else None
+        _logged_at_index_zero = datetime.fromtimestamp(int(_logged_at_index_zero) / 1000)
+        for log in logs:
+            _logged_at = datetime.fromtimestamp(int(log['logged_at_unix']) / 1000)
+            self.assertLessEqual(_logged_at_index_zero, _logged_at, 'Searchc by name, first date limit, last date limit, descending order: order did not work')
+            _logged_at_index_zero = _logged_at   
+        # ------------------------------------------------------
+
+        # ------------------------------------------------------
+        # Test 3 - Test with date, ascending, limit
+        _before = datetime.now() - timedelta(days=3)
+        _after = datetime.now()
+        limit = random.randint(1, 150)
+        errors = zathura.get_error_by_date_limit(_before, _after, limit=limit)
+        
+        total = errors['total'] if 'total' in errors else -1
+        logs = errors['log'] if 'log' in errors else list()
+        self.assertNotEqual(total, -1, "key 'total' is not present inside 'errors' dict")
+        self.assertNotEqual(total, 0, "list is not supposed to be empty here now")
+        self.assertEqual(total, limit, "List is supposed to trancate down to limit")
+        self.assertEqual(total, len(logs), "Length of all logs and total did not match!")
+        # Ascending has already been tested before - skipping --
+        # ------------------------------------------------------
+
+        # ------------------------------------------------------
+        # Test 4 - Test with date, descending, limit
+        _before = datetime.now() - timedelta(days=3)
+        _after = datetime.now()
+        limit = random.randint(1, 150)
+        errors = zathura.get_error_by_date_limit(_before, _after, limit=limit, desc=True)
+        
+        total = errors['total'] if 'total' in errors else -1
+        logs = errors['log'] if 'log' in errors else list()
+        self.assertNotEqual(total, -1, "key 'total' is not present inside 'errors' dict")
+        self.assertNotEqual(total, 0, "list is not supposed to be empty here now")
+        self.assertEqual(total, limit, "List is supposed to trancate down to limit")
+        self.assertEqual(total, len(logs), "Length of all logs and total did not match!")
+        # Descending has already been tested before - skipping -
+        # ------------------------------------------------------
 
 
     def test_mark_resolve(self):
@@ -317,15 +435,32 @@ class TestAll(unittest.TestCase):
             self.assertIsNone(resolved_at, "Is resolved should be None here!")
         # ----------------------------------------------------------------
         
+    def test_debug_insertion(self):
+        """
+        Tests debug insertion on sqlite3 Table.
+        """
+        zathura = Zathura()
+        for i in range(0, 10):
+            row = zathura.insert_debug_log("Test - {}".format(i))
+            self.assertEqual(row, 1, "Insertion debug did not work properly")
 
     def test_all_debug(self):
-        pass
+        zathura = Zathura()
 
-    def test_debug_by_user(self):
-        pass
+        debugs = zathura.get_all_debug_log()
+        total = debugs['total'] if 'total' in debugs else -1
+        logs = debugs['log'] if 'log' in debugs else list()
 
-    def test_debug_by_origin(self):
-        pass
+        self.assertGreaterEqual(total, 100, 'There should be 100 debug messages on database at least')
+        self.assertNotEqual(total, -1, "'total' key is not present in 'debugs' dict")
+        self.assertNotEqual(total, 0, 'db is not populated! WT!')
+        self.assertEqual(total, len(logs), "total and log length did not match!")
+
+    # def test_debug_by_user(self):
+    #     pass
+
+    # def test_debug_by_origin(self):
+    #     pass
 
     @classmethod
     def tearDownClass(cls):
