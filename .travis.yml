@@ -12,4 +12,4 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - Test.bomb_it_up
+  - python3 -m unittest Test.bomb_it_up
