@@ -51,7 +51,7 @@ class TestAll(unittest.TestCase):
             counter += rows
         self.assertEqual(counter, 50, "test insertion - inserted 50 data")
 
-
+    # Recheck this test case
     def test_search_by_error_name(self):
         """
         Test search by error name. 
@@ -447,6 +447,9 @@ class TestAll(unittest.TestCase):
             self.assertEqual(row, 1, "Insertion debug did not work properly")
 
     def test_all_debug(self):
+        """
+        test get_all_debug message function
+        """
         zathura = Zathura()
 
         debugs = zathura.get_all_debug_log()
@@ -458,11 +461,91 @@ class TestAll(unittest.TestCase):
         self.assertNotEqual(total, 0, 'db is not populated! WT!')
         self.assertEqual(total, len(logs), "total and log length did not match!")
 
-    # def test_debug_by_user(self):
-    #     pass
+    def test_debug_by_user(self):
+        """
+        Test debug under user
+        total dum dum functions. Still test it since I wrote it.
+        """
+        zathura = Zathura()
+        verbose = zathura.get_debug_by_developers()
+        total = verbose['total'] if 'total' in verbose else -1
+        logs = verbose['log'] if 'log' in verbose else list()
 
-    # def test_debug_by_origin(self):
-    #     pass
+        self.assertEqual(total, len(logs), 'logs and length did not match with each other')
+        self.assertNotEqual(total, -1, "total value cannot be -1. Error occurred somewhere")
+        self.assertNotEqual(total, 0, "debug logs are not suppose to be ZerO!")
+
+        verbose = zathura.get_debug_by_developers(developers_name='zathura')
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertNotEqual(len(logs), 0, "debug logs are not suppose to be ZerO!")
+        for log in logs:
+            self.assertEqual(log['user'], 'zathura', 'user name did not matcheio')
+
+        verbose = zathura.get_debug_by_developers(developers_name='puka poka')
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertEqual(len(logs), 0, "debug logs are supposed to be ZerO!")
+
+        first_limit = datetime.now() - timedelta(days=2)
+        last_limit = datetime.now() + timedelta(days=1)
+        verbose = zathura.get_debug_by_developers(developers_name='zathura', first_limit=first_limit, last_limit=last_limit)
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertNotEqual(len(logs), 0, "debug logs are not suppose to be ZerO!")
+        first_log = datetime.fromtimestamp(int(logs[0]['logged_at_unix']) / 1000)
+        last_log = datetime.fromtimestamp(int(logs[len(logs) - 1]['logged_at_unix']) / 1000)
+        self.assertGreaterEqual(first_log, first_limit, "log time should be less than or equal to datetime")
+        self.assertGreater(last_limit, last_log, "last log time should be less than limit or equal")
+
+        first_limit = datetime.now() - timedelta(days=1)
+        verbose = zathura.get_debug_by_developers(developers_name='zathura', first_limit=first_limit)
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertNotEqual(len(logs), 0, "debug logs are not suppose to be ZerO!")
+        first_log = datetime.fromtimestamp(int(logs[0]['logged_at_unix']) / 1000)
+        self.assertGreaterEqual(first_log, first_limit, "log time should be less than or equal to datetime")
+
+        verbose = zathura.get_debug_by_developers('')
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertNotEqual(len(logs), 0, "debug logs are not suppose to be ZerO!")
+
+    def test_debug_by_origin(self):
+        """
+        Test get debug by origin under multiple function parameter
+        """
+        zathura = Zathura()
+        origin = self.setUpClass.__name__
+
+        verbose = zathura.get_debug_by_origin(origin = origin)
+        total = verbose['total'] if 'total' in verbose else -1
+        logs = verbose['log'] if 'log' in verbose else list()
+
+        self.assertEqual(total, len(logs), 'logs and length did not match with each other')
+        self.assertNotEqual(total, -1, "total value cannot be -1. Error occurred somewhere")
+        self.assertNotEqual(total, 0, "debug logs are not suppose to be ZerO!")
+
+        for log in logs:
+            self.assertEqual(log['point_of_origin'], origin.lower(), 'Origins are not matching up homie!')
+        
+        first_limit = datetime.now() - timedelta(days=2)
+        last_limit = datetime.now() + timedelta(days=1)
+        verbose = zathura.get_debug_by_origin(origin, first_limit, last_limit)
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertNotEqual(len(logs), 0, "logs cannot be empty now!")
+        first_log = datetime.fromtimestamp(int(logs[0]['logged_at_unix']) / 1000)
+        last_log = datetime.fromtimestamp(int(logs[len(logs) - 1]['logged_at_unix']) / 1000)
+        self.assertGreaterEqual(first_log, first_limit, "log time should be less than or equal to datetime")
+        self.assertGreater(last_limit, last_log, "last log time should be less than limit or equal")
+
+        first_limit = datetime.now() - timedelta(days=1)
+        verbose = zathura.get_debug_by_origin(origin, first_limit)
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertGreater(len(logs), 0, "logs cannot be empty now!")
+
+        verbose = zathura.get_debug_by_origin(origin='', first_limit=first_limit, last_limit=last_limit)
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertGreater(len(logs), 0, "logs cannot be empty now!")
+
+        verbose = zathura.get_debug_by_origin(origin='hello_world')
+        logs = verbose['log'] if 'log' in verbose else list()
+        self.assertEqual(len(logs), 0, "logs are supposed to be zeroooooo here!")
 
     @classmethod
     def tearDownClass(cls):

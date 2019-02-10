@@ -23,8 +23,8 @@ class Zathura:
                     warning = 0
                 elif warning > 3:
                     warning = 3
-                point_of_origin = inspect.stack()[1].function
-                error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin.lower(), warning_level=warning)
+                point_of_origin = (inspect.stack()[1].function).lower()
+                error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin, warning_level=warning)
                 return error_log.save()  # number of modified rows are returned. (Always be 1)
             except ValueError:
                 # TODO: add logger 
@@ -47,7 +47,7 @@ class Zathura:
             print("unknown error occurred")
             return 0
             
-    def insert_debug_log(self, message_data:str,  developer:str = 'Logger_Test_User'):
+    def insert_debug_log(self, message_data:str,  developer:str = 'zathura'):
         """
         # Insert debug and verbose logs. Logs will purge after a week.
         # It's not going to print out anything right now.
@@ -58,7 +58,7 @@ class Zathura:
         if message_data is not None:
             from uuid import uuid4
             database_connection()  # initiate database connection before doing anything. 
-            origin = inspect.stack()[1].function
+            origin = (inspect.stack()[1].function).lower()
             debug_log = DebugLog(_id = str(uuid4()), user=developer, message_data = message_data.lower(), point_of_origin = origin)
             close_db()
             return debug_log.save()
@@ -97,6 +97,7 @@ class Zathura:
             "message-data": debug_log_object.message_data,
             "point_of_origin": debug_log_object.point_of_origin,
             "logged_at": Utility.milli_to_datetime(debug_log_object.logged_at),
+            "logged_at_unix": debug_log_object.logged_at,
         }
     
     def __generate_error_return_payload(self, log_paylod: ModelSelect):
@@ -383,21 +384,26 @@ class Zathura:
         last_limit: datetime filters out data after this limit
         origin: str point of origin of any debug msg that needs to be on this list.
         """
-        if origin is not None or len(origin) != 0:
+        if origin is not None and len(origin) > 0:
             origin = origin.strip()
             origin = origin.lower()
+        else:
+            return self.get_all_debug_log()  # blind send everything.
+        
+        database_connection()  # initiate database connection before doing anything.
+        filter_param_one = (DebugLog.point_of_origin == origin)
 
-        database_connection()  # initiate database connection before doing anything. 
         if first_limit is None and last_limit is None:
-            debugs = DebugLog.select().where(DebugLog.point_of_origin == origin.lower())
+            debugs = DebugLog.select().where(filter_param_one)
         else:
             first_limit = Utility.unix_time_millis(first_limit)
-            if first_limit is not None and last_limit is None:
+            if last_limit is None:
                 last_limit = Utility.current_time_in_milli()
             else:
                 last_limit = Utility.unix_time_millis(last_limit)
-
-            debugs = DebugLog.select().where((DebugLog.point_of_origin == origin.lower()) & (DebugLog.logged_at >= first_limit) & (DebugLog.logged_at <= last_limit))
+            filter_param_two = (DebugLog.logged_at >= first_limit)
+            filter_param_three = (DebugLog.logged_at <= last_limit)
+            debugs = DebugLog.select().where(filter_param_one & filter_param_two & filter_param_three)
         close_db()
         return self.__generate_verbose_return_payload(debugs)
 
@@ -408,14 +414,14 @@ class Zathura:
         last_limit: datetime filters out data after this limit
         developers_name: str developers_name : who wrote the debug message. For debugging person. Could be None or empty string.
         """
-        if len(developers_name) == 0:
+        if len(developers_name) == 0 or developers_name is None:
             return self.get_all_debug_log()
         database_connection()  # initiate database connection before doing anything. 
         if first_limit is None and last_limit is None:
             debugs = DebugLog.select().where(DebugLog.user == developers_name)
         else:
             first_limit = Utility.unix_time_millis(first_limit)    
-            if first_limit is not None and last_limit is None:
+            if last_limit is None:
                 last_limit = Utility.current_time_in_milli()
             else:
                 last_limit = Utility.unix_time_millis(last_limit)
