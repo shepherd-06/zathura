@@ -1,4 +1,5 @@
 import inspect
+import logging
 from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection, close_db, database_start
 from datetime import datetime
 from ZathuraProject.utility import Utility
@@ -7,8 +8,44 @@ from peewee import ModelSelect
 
 class Zathura:
     def __init__(self):
-        # TODO: should check if database is already connected or not.
         self.empty_result = {'error': True}
+        self.logger = logging.getLogger('zathura')
+        __formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        __log_stream_handler = logging.StreamHandler()
+        __log_stream_handler.setFormatter(__formatter)
+        self.logger.setLevel(10)
+        self.logger.addHandler(__log_stream_handler)
+
+    def get_logger(self):
+        """
+        returns the logger to other classes if needed
+        """
+        return self.logger
+
+    def __logs(self, message: str, level: int):
+        """
+        message: str message to deliver
+        level: int ``` 0 : No Info
+                       1 : Debug
+                       2 : Info
+                       3 : Warning
+                       4 : Error
+                       5: Critical
+                    ```
+        """
+        if level >= 0 and level < 1:
+            self.logger.log(message)
+        elif level >= 1 and level < 2:
+            self.logger.debug(message)
+        elif level >= 2 and level < 3:
+            self.logger.info(message)
+        elif level >= 3 and level < 4:
+            self.logger.warning(message)
+        elif level >= 4 and level < 5:
+            self.logger.error(message)
+        else:
+            self.logger.critical(message)
+
 
     def insert_error_log(self, user:str, error_name:str, error_description:str, warning:int = 0):
         """
@@ -21,30 +58,26 @@ class Zathura:
                 database_connection()  # initiate database connection before doing anything. 
                 if warning < 0:
                     warning = 0
-                elif warning > 3:
-                    warning = 3
+                elif warning > 5:
+                    warning = 5
                 point_of_origin = (inspect.stack()[1].function).lower()
                 error_log = ErrorLog(_id = str(uuid4()),user = user, error_name = error_name.lower(), error_description = error_description, point_of_origin = point_of_origin, warning_level=warning)
                 return error_log.save()  # number of modified rows are returned. (Always be 1)
             except ValueError:
-                # TODO: add logger 
-                print("Wrong warning field value")
+                self.logger.exception("Error occurred", exc_info=True)
             except SyntaxError:
-                # TODO: add logger
-                print("Wrong warning field value")
+                self.logger.exception("Error occurred", exc_info=True)
             finally:
                 close_db()
-            # TODO: for future, log if any errors occurred while storing.
         else:
             if user is None:
-                print("username cannot be None. It would be easier to log against the user")
-            if error_name is None:
-                print("log against a specific error_name.")
-            if error_description is None:
-                print("give an appropiate error_description")
-            if point_of_origin is None:
-                print("Provide appropiate error entry registry for better understanding!")
-            print("unknown error occurred")
+                self.__logs("username cannot be None. It would be easier to log against the user", 4)
+            elif error_name is None:
+                self.__logs("log against a specific error_name.", 4)
+            elif error_description is None:
+                self.__logs("give an appropiate error_description", 4)
+            else:
+                self.__logs("unknown error occurred", 5)
             return 0
             
     def insert_debug_log(self, message_data:str,  developer:str = 'zathura'):
@@ -64,8 +97,9 @@ class Zathura:
             return debug_log.save()
         else: 
             if message_data is None:
-                print("message_data should not be NONE. Since it's what you are currently logging to remember right?")
-            print("unknown error occurred")
+                self.__logs("message_data should not be NONE. Since it's what you are currently logging to remember right?", 3)
+            else:
+                self.__logs("unknown error occurred", 3)
             return 0
 
     def __error_obj_to_dict(self, error_log_object: ErrorLog):
@@ -74,16 +108,16 @@ class Zathura:
         error_log_object: ErrorLog a ErrorLog object
         """
         return {
-            'user': error_log_object.user,
-            'error_name': error_log_object.error_name,
-            'error_description': error_log_object.error_description,
-            'point_of_origin': error_log_object.point_of_origin,
-            'logged_at': Utility.milli_to_datetime(error_log_object.logged_at),
-            'logged_at_unix': error_log_object.logged_at,
-            'is_resolved': "Resolved" if error_log_object.is_resolved else "Not Resolved",  
-            'resolved_at': error_log_object.resolved_at if error_log_object.resolved_at is None else Utility.milli_to_datetime(error_log_object.resolved_at),
-            'resolved_at_unix': error_log_object.resolved_at,
-            'warning_level': self.__get_warning_level_in_text(error_log_object.warning_level),
+            Utility.Tag_User: error_log_object.user,
+            Utility.Tag_Error_Name: error_log_object.error_name,
+            Utility.Tag_Error_Description: error_log_object.error_description,
+            Utility.Tag_Origin: error_log_object.point_of_origin,
+            Utility.Tag_Logged_At: Utility.milli_to_datetime(error_log_object.logged_at),
+            Utility.Tag_Logged_At_Unix: error_log_object.logged_at,
+            Utility.Tag_Is_Resolved: Utility.Tag_Text_Resolved if error_log_object.is_resolved else Utility.Tag_Text_Not_Resolved,  
+            Utility.Tag_Resolved_At: error_log_object.resolved_at if error_log_object.resolved_at is None else Utility.milli_to_datetime(error_log_object.resolved_at),
+            Utility.Tag_Resolved_At_Unix: error_log_object.resolved_at,
+            Utility.Tag_Warning_Level: self.__get_warning_level_in_text(error_log_object.warning_level),
         }
 
     @staticmethod
@@ -93,11 +127,11 @@ class Zathura:
         debug_log_object: DebugLog a DebugLog object
         """
         return {
-            "user": debug_log_object.user,
-            "message-data": debug_log_object.message_data,
-            "point_of_origin": debug_log_object.point_of_origin,
-            "logged_at": Utility.milli_to_datetime(debug_log_object.logged_at),
-            "logged_at_unix": debug_log_object.logged_at,
+            Utility.Tag_User: debug_log_object.user,
+            Utility.Tag_Message: debug_log_object.message_data,
+            Utility.Tag_Origin: debug_log_object.point_of_origin,
+            Utility.Tag_Logged_At: Utility.milli_to_datetime(debug_log_object.logged_at),
+            Utility.Tag_Logged_At_Unix: debug_log_object.logged_at,
         }
     
     def __generate_error_return_payload(self, log_paylod: ModelSelect):
@@ -107,15 +141,17 @@ class Zathura:
         all_error_logs = list()
         for err in log_paylod:
             all_error_logs.append(self.__error_obj_to_dict(err))
-        return {"total": len(all_error_logs), "log": all_error_logs}
+        return {Utility.Tag_Total: len(all_error_logs), Utility.Tag_Log: all_error_logs}
 
     @staticmethod
     def __get_warning_level_in_text(warning_level: int):
         _ = {
-            '0': 'warning',
-            '1': 'Level - 1',
-            '2': 'Level - 2',
-            '3': 'Critical'
+            '0': 'NOTSET',
+            '1': 'DEBUG',
+            '2': 'INFO',
+            '3': 'WARNING',
+            '4': 'ERROR',
+            '5': 'CRITICAL'
         }
         return _[str(warning_level)]
 
@@ -126,7 +162,7 @@ class Zathura:
         all_logs = list()
         for log in debug_payload:
             all_logs.append(self.__debug_obj_to_dict(log))
-        return {"total": len(all_logs), "log": all_logs}
+        return {Utility.Tag_Total: len(all_logs), Utility.Tag_Log: all_logs}
 
     def get_all_error_log(self, show_all: bool = False, desc: bool = False):
         """
@@ -170,7 +206,8 @@ class Zathura:
         """
         if len(user) == 0:
             result = self.empty_result
-            result['message'] = "Username cannot be empty for this function!"
+            result[Utility.Tag_error_message] = "Username cannot be empty for this function!"
+            self.__logs(result[Utility.Tag_error_message], Utility.Tag_Log_ERROR)
             return result
         user = user.strip()
         database_connection()  # initiate database connection before doing anything. 
@@ -226,7 +263,8 @@ class Zathura:
         """
         if beginning_limit is None:
             result = self.empty_result
-            result['message'] = "Please insert the first date to search after a specific time."
+            result[Utility.Tag_error_message] = "Please insert the first date to search after a specific time."
+            self.__logs(result[Utility.Tag_error_message], Utility.Tag_Log_ERROR)
             return result
         first_limit = Utility.unix_time_millis(beginning_limit)
         if ending_limit is None:
@@ -266,7 +304,8 @@ class Zathura:
         """
         if error_name is None or len(error_name) == 0:
             result = self.empty_result
-            result['message'] = "Error name cannot be empty on this search"
+            result[Utility.Tag_error_message] = "Error name cannot be empty on this search"
+            self.__logs(result[Utility.Tag_error_message], Utility.Tag_Log_ERROR)
             return result
         error_name = error_name.strip()
         error_name = error_name.lower()
@@ -438,10 +477,12 @@ class Zathura:
         """
         result = self.empty_result
         if error_name is None or len(error_name) == 0:
-            result['message'] = "missing error name!"
+            result[Utility.Tag_error_message] = "missing error name!"
+            self.__logs(result[Utility.Tag_error_message], Utility.Tag_Log_ERROR)
             return result
         if origin is None or len(origin) == 0:
-            result['message'] = 'missing error origin!'
+            result[Utility.Tag_error_message] = 'missing error origin!'
+            self.__logs(result[Utility.Tag_error_message], Utility.Tag_Log_ERROR)
             return result
         database_connection()  # initiate database connection before doing anything. 
         error_name = error_name.strip().lower()
@@ -454,14 +495,13 @@ class Zathura:
         close_db()
         return result
 
-    @staticmethod
-    def delete_old_debug():
+    def delete_old_debug(self):
         from datetime import timedelta
         database_connection()  # initiate database connection before doing anything. 
         limit = (datetime.now() - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
-        print("Deleting record older than {}".format(limit.strftime('%A, %d %B, %Y')))
+        self.__logs("Deleting record older than {}".format(limit.strftime('%A, %d %B, %Y')), Utility.Tag_Log_INFO)
         today = Utility.unix_time_millis(limit)
         delete_stuff = DebugLog.delete().where(DebugLog.logged_at < today)
         result = delete_stuff.execute()
         close_db()
-        print("Deleted {} debug entries".format(result))
+        self.__logs("Deleted {} debug entries".format(result), Utility.Tag_Log_INFO)

@@ -2,6 +2,32 @@ from time import time
 from datetime import datetime
 
 class Utility:
+
+    Tag_User = 'user'
+    Tag_Error_Name = 'error_name'
+    Tag_Error_Description = 'error_description'
+    Tag_Origin = 'point_of_origin'
+    Tag_Logged_At = 'logged_at'
+    Tag_Logged_At_Unix = 'logged_at_unix'
+    Tag_Is_Resolved = 'is_resolved'
+    Tag_Resolved_At = 'resolved_at'
+    Tag_Resolved_At_Unix = 'resolved_at_unix'
+    Tag_Warning_Level = 'warning-level'
+    Tag_Message = 'message-data'
+    Tag_Total = 'total'
+    Tag_Log = 'log'
+    Tag_Log_CRITICAL = 5
+    Tag_Log_ERROR = 4
+    Tag_Log_WARNING = 3
+    Tag_Log_INFO = 2
+    Tag_Log_DEBUG = 1
+    Tag_Log_NotSet = 0
+    Tag_error_message = 'message'
+    Tag_Text_Resolved = 'Resolved'
+    Tag_Text_Not_Resolved = 'Not Resolved'
+
+
+
     @staticmethod
     def get_timeformat():
         """

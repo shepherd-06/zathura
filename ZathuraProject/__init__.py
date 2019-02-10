@@ -7,7 +7,7 @@ from datetime import datetime
 from ZathuraProject.utility import Utility
 from ZathuraProject.zathura import Zathura
 
-CURRENT_VERSION = 'v0.0.3-dev14'
+CURRENT_VERSION = 'v0.0.4-alpha1'
 known_commands = ('v', 'developer', 'debug_origin', 'error_user', 'all_debug', 'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
 
 def create_app():
@@ -132,13 +132,19 @@ def print_stuff_nice_and_good(payload:dict, message: str = None, date_filter_aft
     payload: dict the payload you just received from the sqlite_utility file
     message: str any extra message you want to add?
     """
-    os.system('clear')
     if payload is None:
         return
-    total = payload['total'] if 'total'in payload else None
+    
+    if 'error' in payload:
+        error_message = payload[Utility.Tag_error_message]
+        print("[[[[[ Error occurred. ]]]]]\nMessage: ```{}```".format(error_message))
+    else:
+        os.system('clear')
+
+    total = payload[Utility.Tag_Total] if Utility.Tag_Total in payload else None
     if total is None:
         return
-    logs = payload['log'] if 'log' in payload else None 
+    logs = payload[Utility.Tag_Log] if Utility.Tag_Log in payload else None 
     if logs is None:
         return
 
