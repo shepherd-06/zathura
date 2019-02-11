@@ -12,7 +12,7 @@ class Utility:
     Tag_Is_Resolved = 'is_resolved'
     Tag_Resolved_At = 'resolved_at'
     Tag_Resolved_At_Unix = 'resolved_at_unix'
-    Tag_Warning_Level = 'warning-level'
+    Tag_Warning_Level = 'warning_level'
     Tag_Message = 'message-data'
     Tag_Total = 'total'
     Tag_Log = 'log'
