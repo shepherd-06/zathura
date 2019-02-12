@@ -97,7 +97,7 @@ class Zathura:
             database_connection()
             origin = (inspect.stack()[1].function).lower()
             debug_log = DebugLog(_id=str(uuid4()), user=developer,
-                                 message_data=message_data.lower(), point_of_origin=origin)
+                                 message_data=message_data, point_of_origin=origin)
             close_db()
             return debug_log.save()
         else:
