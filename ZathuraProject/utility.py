@@ -1,6 +1,7 @@
 from time import time
 from datetime import datetime
 
+
 class Utility:
 
     Tag_User = 'user'
@@ -26,24 +27,24 @@ class Utility:
     Tag_Text_Resolved = 'Resolved'
     Tag_Text_Not_Resolved = 'Not Resolved'
 
-
-
     @staticmethod
     def get_timeformat():
         """
         time format
         """
         return '%A, %d %B, %Y at %H:%M:%S.%f'
-    
+
     @staticmethod
     def get_print_timeformat():
         """
         time format
         """
         return '%A, %d %B, %Y at 12 AM'
-    
+
     # lamda function
-    current_time_in_milli = lambda: int(round(time() * 1000))
+    @staticmethod
+    def current_time_in_milli():
+        return int(round(time() * 1000))
 
     # unix time to current time in milli converstion
     @staticmethod
