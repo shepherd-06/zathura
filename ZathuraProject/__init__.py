@@ -196,11 +196,12 @@ def print_stuff_nice_and_good(payload: dict, message: str = None, date_filter_af
     print('--------------------------------------------------------')
     print("Logs found = {}".format(total))
     print('--------------------------------------------------------\n')
-
+    
+    counter = 1
     for log in logs:
         if 'error_name' in log:
-            print("User: [[ {} ]] | Error: [[ {} ]] | Warning Level: [[ {} ]] | logged at: {} | Originated at [[ {} ]]".format(
-                log['user'], log['error_name'], log['warning_level'], log['logged_at'], log['point_of_origin']))
+            print("[[ {} ]] | User: [[ {} ]] | Error: [[ {} ]] | Warning Level: [[ {} ]] | logged at: {} | Originated at [[ {} ]]".format(
+                counter, log['user'], log['error_name'], log['warning_level'], log['logged_at'], log['point_of_origin']))
             print("Error Description: {}".format(log['error_description']))
             if log['is_resolved'] == "Resolved":
                 print("Status: Resolved. Resolved at {}".format(
@@ -209,10 +210,11 @@ def print_stuff_nice_and_good(payload: dict, message: str = None, date_filter_af
                 print("Status: Not Resolved yet")
             print('--------------------------------------------------------\n')
         else:
-            print("Developer: [[ {} ]] | logged at: {} | Location: [[ {} ]]".format(
-                log['user'], log['logged_at'], log['point_of_origin']))
+            print("[[ {} ]] | Developer: [[ {} ]] | logged at: {} | Location: [[ {} ]]".format(
+                counter, log['user'], log['logged_at'], log['point_of_origin']))
             print("Message: {}".format(log['message-data']))
             print('--------------------------------------------------------\n')
+        counter += 1
 
 
 def command_man():
