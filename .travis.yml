@@ -8,4 +8,3 @@ install:
 # command to run tests
 script:
   - python3 -m unittest Test.bomb_it_up
-  - codecov
