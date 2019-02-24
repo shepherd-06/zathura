@@ -8,7 +8,7 @@ from datetime import datetime
 from ZathuraProject.utility import Utility
 from ZathuraProject.zathura import Zathura
 
-CURRENT_VERSION = pkg_resources.require("zathura")[0].version
+CURRENT_VERSION = "v0.0.4a2"
 known_commands = ('v', 'developer', 'debug_origin', 'error_user', 'all_debug',
                   'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
 
