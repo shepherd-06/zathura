@@ -1,4 +1,9 @@
 from setuptools import setup
+from os import path
+
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 install_requires = [
     'peewee',
@@ -7,8 +12,10 @@ install_requires = [
 
 setup(name='zathura',
       packages=['ZathuraProject'],
-      version='0.0.4.3.a2',
+      version='0.0.4.4.a2',
       description='Zathura is a small space logger. It logs stuff into her logbook as she drifts into vast unknown of development phase.',
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       url='https://github.com/ibtehaz-shawon/Zathura',
       author='Ibtehaz Shawon',
       author_email='ibtehaz.92@gmail.com',

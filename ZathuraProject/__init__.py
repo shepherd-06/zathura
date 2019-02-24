@@ -1,13 +1,14 @@
 import os
 import sys
 import time
+import pkg_resources 
 from datetime import datetime
 from uuid import uuid4
 from datetime import datetime
 from ZathuraProject.utility import Utility
 from ZathuraProject.zathura import Zathura
 
-CURRENT_VERSION = 'v0.0.4.3-alpha2'
+CURRENT_VERSION = pkg_resources.require("MyProject")[0].version
 known_commands = ('v', 'developer', 'debug_origin', 'error_user', 'all_debug',
                   'error_name', 'date', 'all_error', 'origin', 'mark_resolve', 'delete_debug', 'help',)
 
@@ -23,7 +24,6 @@ def create_app():
                 print("Current argument: {}".format(args))
                 sql_utils = Zathura()
                 if args == 'v':
-                    # TODO: is not gonna work for pip project.
                     print(CURRENT_VERSION)
                 elif args == "all_error":
                     filter_resolved = input(
