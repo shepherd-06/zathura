@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import pkg_resources 
+import pyfiglet
 from datetime import datetime
 from uuid import uuid4
 from datetime import datetime
@@ -24,7 +25,9 @@ def create_app():
                 print("Current argument: {}".format(args))
                 sql_utils = Zathura()
                 if args == 'v':
-                    print(CURRENT_VERSION)
+                    print("*#$" * 20)
+                    print(pyfiglet.figlet_format("Zathura - {}".format(CURRENT_VERSION)))
+                    print("*#$" * 20)
                 elif args == "all_error":
                     filter_resolved = input(
                         "Press 1 to see all errors, including resolved, any key for others: ")
