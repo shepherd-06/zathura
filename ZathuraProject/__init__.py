@@ -26,7 +26,8 @@ def create_app():
                 sql_utils = Zathura()
                 if args == 'v':
                     print("*#$" * 20)
-                    print(pyfiglet.figlet_format("Zathura - {}".format(CURRENT_VERSION)))
+                    print(pyfiglet.figlet_format("Zathura", font="xsbook"))
+                    print("Current version: {}".format(CURRENT_VERSION))
                     print("*#$" * 20)
                 elif args == "all_error":
                     filter_resolved = input(
@@ -101,7 +102,10 @@ def create_app():
                 command_man()
                 break
     else:
-        print(CURRENT_VERSION)
+        print("*#$" * 20)
+        print(pyfiglet.figlet_format("Zathura", font="xsbook"))
+        print("Current version: {}".format(CURRENT_VERSION))
+        print("*#$" * 20)
     return
 
 
