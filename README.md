@@ -1,6 +1,14 @@
 [![Build Status](https://travis-ci.org/ibtehaz-shawon/zathura.svg?branch=master)](https://travis-ci.org/ibtehaz-shawon/zathura)
 
-# Zathura 
+# Zathura
+#####            ##                      
+#   #        #    #                      
+#  #         #    #                      
+  #    ##   ###   ###   #  #  ## #  ##   
+  #   #  #   #    #  #  #  #   ##  #  #  
+ #  #  ###   #    #  #  #  #   #    ###  
+#   # #  #   #    #  #  #  #   #   #  #  
+##### #####   ##  ## ##  ## # ###  ##### 
 Zathura is a sqlite3 based logger. Currently, you can see your error and debug logs from terminal only. However, I am working on webview. Do keep in mind, you will have to handle the authentication for your own project.
 
 -------------------------------
