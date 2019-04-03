@@ -1,5 +1,12 @@
 [![Build Status](https://travis-ci.org/ibtehaz-shawon/zathura.svg?branch=master)](https://travis-ci.org/ibtehaz-shawon/zathura)
 
+```
+______       ___________                       
+___  /______ __  /___  /_____  ______________ _
+__  / _  __ `/  __/_  __ \  / / /_  ___/  __ `/
+_  /__/ /_/ // /_ _  / / / /_/ /_  /   / /_/ / 
+/____/\__,_/ \__/ /_/ /_/\__,_/ /_/    \__,_/  
+```
 # Zathura
 Zathura is a sqlite3 based logger. Currently, you can see your error and debug logs from terminal only. However, I am working on webview. Do keep in mind, you will have to handle the authentication for your own project.
 

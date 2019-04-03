@@ -19,6 +19,8 @@ def create_app():
         print("Zathura needs python3.x to perform normally!")
         sys.exit(255)
 
+    pyfiglet_ascii() # spits out zathura in speed font
+
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:
             if args in known_commands:
@@ -26,7 +28,6 @@ def create_app():
                 sql_utils = Zathura()
                 if args == 'v':
                     print("*#$" * 20)
-                    print(pyfiglet.figlet_format("Zathura", font="xsbook"))
                     print("Current version: {}".format(CURRENT_VERSION))
                     print("*#$" * 20)
                 elif args == "all_error":
@@ -103,11 +104,13 @@ def create_app():
                 break
     else:
         print("*#$" * 20)
-        print(pyfiglet.figlet_format("Zathura", font="xsbook"))
         print("Current version: {}".format(CURRENT_VERSION))
         print("*#$" * 20)
     return
 
+
+def pyfiglet_ascii():
+    print(pyfiglet.figlet_format("Zathura", font="speed"))
 
 def ask_filter_and_order(ask_limit=True):
     desc = input(
