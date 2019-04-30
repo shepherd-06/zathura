@@ -34,15 +34,15 @@ class Zathura:
                        5: Critical
                     ```
         """
-        if level >= 0 and level < 1:
+        if 0 <= level < 1:
             self.logger.log(message)
-        elif level >= 1 and level < 2:
+        elif 1 <= level < 2:
             self.logger.debug(message)
-        elif level >= 2 and level < 3:
+        elif 2 <= level < 3:
             self.logger.info(message)
-        elif level >= 3 and level < 4:
+        elif 3 <= level < 4:
             self.logger.warning(message)
-        elif level >= 4 and level < 5:
+        elif 4 <= level < 5:
             self.logger.error(message)
         else:
             self.logger.critical(message)
