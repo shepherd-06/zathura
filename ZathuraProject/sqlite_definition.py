@@ -1,7 +1,9 @@
-from peewee import SqliteDatabase, Model, UUIDField, CharField, TextField, CharField, BooleanField, IntegerField
-from playhouse.migrate import SqliteMigrator, migrate
 from datetime import datetime
 from uuid import uuid4
+
+from peewee import (BooleanField, CharField, IntegerField, Model,
+                    SqliteDatabase, TextField, UUIDField)
+from playhouse.migrate import SqliteMigrator, migrate
 from ZathuraProject.utility import Utility
 
 db = SqliteDatabase('logger.db')
@@ -46,14 +48,6 @@ def database_connection():
     else:
         database_start()
         db.connect(reuse_if_open=True)
-
-    # TODO: handle all migrations commands from here
-    # Reference: http://docs.peewee-orm.com/en/latest/peewee/playhouse.html#migrate
-    # with db.atomic():
-    #     migrate(
-    #         migrator.rename_column('DebugLog', 'id', '_id')
-    #     )
-
     # Create the tables.
     db.create_tables([ErrorLog, DebugLog])
 

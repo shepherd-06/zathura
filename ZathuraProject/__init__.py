@@ -1,11 +1,12 @@
 import os
 import sys
 import time
-import pkg_resources 
-import pyfiglet
 from datetime import datetime
 from uuid import uuid4
-from datetime import datetime
+
+import pkg_resources
+
+import pyfiglet
 from ZathuraProject.utility import Utility
 from ZathuraProject.zathura import Zathura
 
@@ -19,7 +20,7 @@ def create_app():
         print("Zathura needs python3.x to perform normally!")
         sys.exit(255)
 
-    pyfiglet_ascii() # spits out zathura in speed font
+    pyfiglet_ascii()  # spits out zathura in speed font
 
     if len(sys.argv) > 1:
         for args in sys.argv[1:]:
@@ -111,6 +112,7 @@ def create_app():
 
 def pyfiglet_ascii():
     print(pyfiglet.figlet_format("Zathura", font="speed"))
+
 
 def ask_filter_and_order(ask_limit=True):
     desc = input(
@@ -206,7 +208,7 @@ def print_stuff_nice_and_good(payload: dict, message: str = None, date_filter_af
     print('--------------------------------------------------------')
     print("Logs found = {}".format(total))
     print('--------------------------------------------------------\n')
-    
+
     counter = 1
     for log in logs:
         if 'error_name' in log:

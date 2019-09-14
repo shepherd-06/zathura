@@ -1,9 +1,12 @@
 import inspect
 import logging
-from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection, close_db, database_start
 from datetime import datetime
-from ZathuraProject.utility import Utility
+
 from peewee import ModelSelect
+from ZathuraProject.sqlite_definition import (DebugLog, ErrorLog, close_db,
+                                              database_connection,
+                                              database_start)
+from ZathuraProject.utility import Utility
 
 
 class Zathura:
@@ -538,6 +541,9 @@ class Zathura:
         return result
 
     def delete_old_debug(self):
+        """
+        delete old debug data from sqlite database
+        """
         from datetime import timedelta
         # initiate database connection before doing anything.
         database_connection()
