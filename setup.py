@@ -12,12 +12,12 @@ install_requires = [
 
 setup(name='zathura',
       packages=['ZathuraProject'],
-      version='0.0.4.9.b1',
+      version='0.0.5.0.b1',
       description='Zathura is a small space logger. It logs stuff into her logbook as she drifts into vast unknown of development phase.',
       long_description=long_description,
       long_description_content_type='text/markdown',
-      url='https://github.com/ibtehaz-shawon/Zathura',
-      author='Ibtehaz Shawon',
+      url='https://github.com/p1r-a-t3/zathura',
+      author='Mr Anderson',
       author_email='ibtehaz.92@gmail.com',
       license='MIT',
       install_requires=[
