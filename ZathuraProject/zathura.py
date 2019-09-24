@@ -1,13 +1,18 @@
 import inspect
 import logging
-from ZathuraProject.sqlite_definition import ErrorLog, DebugLog, database_connection, close_db, database_start
 from datetime import datetime
-from ZathuraProject.utility import Utility
+
 from peewee import ModelSelect
+
+from ZathuraProject.bugtracker import send_data_to_bugtracker
+from ZathuraProject.sqlite_definition import (DebugLog, ErrorLog, close_db,
+                                              database_connection,
+                                              database_start)
+from ZathuraProject.utility import Utility
 
 
 class Zathura:
-    def __init__(self):
+    def __init__(self, bugtracker_url: str = None, project_token: str = None, cli_log: bool = True):
         self.empty_result = {'error': True}
         self.logger = logging.getLogger('zathura')
         __formatter = logging.Formatter(
@@ -16,6 +21,12 @@ class Zathura:
         __log_stream_handler.setFormatter(__formatter)
         self.logger.setLevel(10)
         self.logger.addHandler(__log_stream_handler)
+        if bugtracker_url is not None:
+            if bugtracker_url[-1:] != '/':
+                bugtracker_url += '/'
+            self.error_logger_url = bugtracker_url + "project/error/log/"
+        self.project_token = project_token
+        self.cli_log = cli_log
 
     def get_logger(self):
         """
@@ -64,6 +75,10 @@ class Zathura:
                 point_of_origin = (inspect.stack()[1].function).lower()
                 error_log = ErrorLog(_id=str(uuid4()), user=user, error_name=error_name.lower(
                 ), error_description=error_description, point_of_origin=point_of_origin, warning_level=warning)
+
+                if self.error_logger_url is not None:
+                    send_data_to_bugtracker(
+                        error_name, error_description, point_of_origin, self.project_token, self.error_logger_url)
                 return error_log.save()  # number of modified rows are returned. (Always be 1)
             except ValueError:
                 self.logger.exception("Error occurred", exc_info=True)
