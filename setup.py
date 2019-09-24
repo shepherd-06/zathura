@@ -7,12 +7,13 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 install_requires = [
     'peewee',
+    'pyfiglet',
 ]
 # https://the-hitchhikers-guide-to-packaging.readthedocs.io/en/latest/specification.html
 
 setup(name='zathura',
       packages=['ZathuraProject'],
-      version='0.0.5.1.b1',
+      version='0.0.5.2.b1',
       description='Zathura is a small space logger. It logs stuff into her logbook as she drifts into vast unknown of development phase.',
       long_description=long_description,
       long_description_content_type='text/markdown',
