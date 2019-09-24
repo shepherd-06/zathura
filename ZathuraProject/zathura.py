@@ -25,6 +25,8 @@ class Zathura:
             if bugtracker_url[-1:] != '/':
                 bugtracker_url += '/'
             self.error_logger_url = bugtracker_url + "project/error/log/"
+        else:
+            self.error_logger_url = bugtracker_url
         self.project_token = project_token
         self.cli_log = cli_log
 
