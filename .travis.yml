@@ -7,4 +7,4 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - python3 -m unittest Test.bomb_it_up
+  - python3 -m unittest Test.test_bomb_it_up

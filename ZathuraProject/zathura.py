@@ -12,15 +12,8 @@ from ZathuraProject.utility import Utility
 
 
 class Zathura:
-    def __init__(self, bugtracker_url: str = None, project_token: str = None, cli_log: bool = True):
+    def __init__(self, bugtracker_url: str = None, project_token: str = None):
         self.empty_result = {'error': True}
-        self.logger = logging.getLogger('zathura')
-        __formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        __log_stream_handler = logging.StreamHandler()
-        __log_stream_handler.setFormatter(__formatter)
-        self.logger.setLevel(10)
-        self.logger.addHandler(__log_stream_handler)
         if bugtracker_url is not None:
             if bugtracker_url[-1:] != '/':
                 bugtracker_url += '/'
@@ -28,77 +21,44 @@ class Zathura:
         else:
             self.error_logger_url = bugtracker_url
         self.project_token = project_token
-        self.cli_log = cli_log
 
-    def get_logger(self):
+    def set_error_log_bugtracker(self, error_name, error_description):
         """
-        returns the logger to other classes if needed
+        sends error log data on bugtracker
         """
-        return self.logger
+        point_of_origin = (inspect.stack()[1].function).lower()
+        if self.error_logger_url is not None:
+            send_data_to_bugtracker(
+                error_name, error_description,
+                point_of_origin, self.project_token,
+                self.error_logger_url)
 
-    def __logs(self, message: str, level: int):
+    def insert_error_log(self, user, error_name, error_description, warning: int = 0):
         """
-        message: str message to deliver
-        level: int ``` 0 : No Info
-                       1 : Debug
-                       2 : Info
-                       3 : Warning
-                       4 : Error
-                       5: Critical
-                    ```
+        Inserts error log on a sqlite db 
         """
-        if 0 <= level < 1:
-            self.logger.log(message)
-        elif 1 <= level < 2:
-            self.logger.debug(message)
-        elif 2 <= level < 3:
-            self.logger.info(message)
-        elif 3 <= level < 4:
-            self.logger.warning(message)
-        elif 4 <= level < 5:
-            self.logger.error(message)
-        else:
-            self.logger.critical(message)
-
-    def insert_error_log(self, user: str, error_name: str, error_description: str, warning: int = 0):
-        """
-        Inserts error log on a sqlite db
-        """
-        if user is not None and error_name is not None and error_description is not None:
+        if error_name is not None and error_description is not None:
             from uuid import uuid4
             try:
-                warning = int(warning)
                 # initiate database connection before doing anything.
                 database_connection()
-                if warning < 0:
-                    warning = 0
-                elif warning > 5:
-                    warning = 5
                 point_of_origin = (inspect.stack()[1].function).lower()
-                error_log = ErrorLog(_id=str(uuid4()), user=user, error_name=error_name.lower(
-                ), error_description=error_description, point_of_origin=point_of_origin, warning_level=warning)
 
-                if self.error_logger_url is not None:
-                    send_data_to_bugtracker(
-                        error_name, error_description, point_of_origin, self.project_token, self.error_logger_url)
+                error_log = ErrorLog(_id=str(uuid4()),
+                                     user="user",
+                                     error_name=error_name.lower(),
+                                     error_description=error_description,
+                                     point_of_origin=point_of_origin,
+                                     warning_level=0)
                 return error_log.save()  # number of modified rows are returned. (Always be 1)
             except ValueError:
-                self.logger.exception("Error occurred", exc_info=True)
+                pass
             except SyntaxError:
-                self.logger.exception("Error occurred", exc_info=True)
+                pass
             finally:
                 close_db()
-        else:
-            if user is None:
-                self.__logs(
-                    "username cannot be None. It would be easier to log against the user", 4)
-            elif error_name is None:
-                self.__logs("log against a specific error_name.", 4)
-            elif error_description is None:
-                self.__logs("give an appropiate error_description", 4)
-            else:
-                self.__logs("unknown error occurred", 5)
-            return 0
+                return 0
+        return 0
 
     def insert_debug_log(self, message_data: str,  developer: str = 'zathura'):
         """
@@ -118,11 +78,6 @@ class Zathura:
             close_db()
             return debug_log.save()
         else:
-            if message_data is None:
-                self.__logs(
-                    "message_data should not be NONE. Since it's what you are currently logging to remember right?", 3)
-            else:
-                self.__logs("unknown error occurred", 3)
             return 0
 
     def __error_obj_to_dict(self, error_log_object: ErrorLog):
@@ -231,8 +186,6 @@ class Zathura:
         if len(user) == 0:
             result = self.empty_result
             result[Utility.Tag_error_message] = "Username cannot be empty for this function!"
-            self.__logs(result[Utility.Tag_error_message],
-                        Utility.Tag_Log_ERROR)
             return result
         user = user.strip()
         # initiate database connection before doing anything.
@@ -296,8 +249,6 @@ class Zathura:
         if beginning_limit is None:
             result = self.empty_result
             result[Utility.Tag_error_message] = "Please insert the first date to search after a specific time."
-            self.__logs(result[Utility.Tag_error_message],
-                        Utility.Tag_Log_ERROR)
             return result
         first_limit = Utility.unix_time_millis(beginning_limit)
         if ending_limit is None:
@@ -341,8 +292,6 @@ class Zathura:
         if error_name is None or len(error_name) == 0:
             result = self.empty_result
             result[Utility.Tag_error_message] = "Error name cannot be empty on this search"
-            self.__logs(result[Utility.Tag_error_message],
-                        Utility.Tag_Log_ERROR)
             return result
         error_name = error_name.strip()
         error_name = error_name.lower()
@@ -533,13 +482,9 @@ class Zathura:
         result = self.empty_result
         if error_name is None or len(error_name) == 0:
             result[Utility.Tag_error_message] = "missing error name!"
-            self.__logs(result[Utility.Tag_error_message],
-                        Utility.Tag_Log_ERROR)
             return result
         if origin is None or len(origin) == 0:
             result[Utility.Tag_error_message] = 'missing error origin!'
-            self.__logs(result[Utility.Tag_error_message],
-                        Utility.Tag_Log_ERROR)
             return result
         # initiate database connection before doing anything.
         database_connection()
@@ -560,11 +505,7 @@ class Zathura:
         database_connection()
         limit = (datetime.now() - timedelta(days=7)).replace(hour=0,
                                                              minute=0, second=0, microsecond=0)
-        self.__logs("Deleting record older than {}".format(
-            limit.strftime('%A, %d %B, %Y')), Utility.Tag_Log_INFO)
         today = Utility.unix_time_millis(limit)
         delete_stuff = DebugLog.delete().where(DebugLog.logged_at < today)
-        result = delete_stuff.execute()
+        _ = delete_stuff.execute()
         close_db()
-        self.__logs("Deleted {} debug entries".format(
-            result), Utility.Tag_Log_INFO)

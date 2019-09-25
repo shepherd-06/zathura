@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from Test.run_test import RunTest
+from Test.test_run import RunTest
 from ZathuraProject import Zathura
 import unittest
 import time
@@ -9,7 +9,7 @@ import random
 class TestAll(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         """
         This function will input random data inside sqlit3 database
         There will 150 entries each time this function is called.

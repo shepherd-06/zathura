@@ -9,11 +9,6 @@ def send_data_to_bugtracker(name: str, description: str, origin: str, token: str
             "error_description": description,
             "point_of_origin": origin
         }
-        
-        _ = requests.post(url, data=data)
-        # print("----------")
-        # print(_)
-        # print(_.text)
-        # print("----------")
+        requests.post(url, data=data)
     except Exception as e:
         print("Exception khaise. {}".format(e))
