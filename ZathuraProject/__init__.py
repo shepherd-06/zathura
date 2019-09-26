@@ -1,13 +1,15 @@
 import os
 import sys
 import time
-import pkg_resources
-import pyfiglet
 from datetime import datetime
 from uuid import uuid4
-from datetime import datetime
+
+import pkg_resources
+import pyfiglet
+
 from ZathuraProject.utility import Utility
 from ZathuraProject.zathura import Zathura
+from ZathuraProject.fetcher import Fetcher
 
 CURRENT_VERSION = "v0.0.5 beta"
 known_commands = ('v', 'developer', 'debug_origin', 'error_user', 'all_debug',
@@ -25,7 +27,7 @@ def create_app():
         for args in sys.argv[1:]:
             if args in known_commands:
                 print("Current argument: {}".format(args))
-                sql_utils = Zathura()
+                fetcher = Fetcher()
                 if args == 'v':
                     print("*#$" * 20)
                     print("Current version: {}".format(CURRENT_VERSION))
@@ -36,19 +38,19 @@ def create_app():
                     # filters data in descending order based on logged_at time.
                     desc = ask_filter_and_order(ask_limit=False)
                     if filter_resolved == '1':
-                        print_stuff_nice_and_good(sql_utils.get_all_error_log(
+                        print_stuff_nice_and_good(fetcher.get_all_error_log(
                             show_all=True, desc=desc), "All Error logs")
                     else:
                         print_stuff_nice_and_good(
-                            sql_utils.get_all_error_log(desc=desc), "All Error logs")
+                            fetcher.get_all_error_log(desc=desc), "All Error logs")
                 elif args == "all_debug":
                     print_stuff_nice_and_good(
-                        sql_utils.get_all_debug_log(), "All Debug messages")
+                        fetcher.get_all_debug_log(), "All Debug messages")
                 elif args == "error_name":
                     error_name = input("Enter the error_name: ")
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
-                    result = sql_utils.get_error_by_error_name(
+                    result = fetcher.get_error_by_error_name(
                         error_name, generated_after, generated_before, limit, desc)
                     print_stuff_nice_and_good(
                         result, "Errors based on error name", generated_after, generated_before, limit, desc, error_name)
@@ -56,7 +58,7 @@ def create_app():
                     user = input("Enter a username: ")
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
-                    logs = sql_utils.get_error_by_user(
+                    logs = fetcher.get_error_by_user(
                         user, limit, desc, generated_after, generated_before)
                     print_stuff_nice_and_good(
                         logs, "Errors based on user", generated_after, generated_before, limit, desc, user)
@@ -64,38 +66,38 @@ def create_app():
                     origin = input("Enter point of origin: ")
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
-                    logs = sql_utils.get_error_by_origin(
+                    logs = fetcher.get_error_by_origin(
                         origin, generated_after, generated_before, limit, desc)
                     print_stuff_nice_and_good(
                         logs, "Errors based on origin function/class", generated_after, generated_before, limit, desc, origin)
                 elif args == "date":
                     generated_after, generated_before = ask_date()
                     desc, limit = ask_filter_and_order()
-                    result = sql_utils.get_error_by_date_limit(
+                    result = fetcher.get_error_by_date_limit(
                         generated_after, generated_before, limit, desc)
                     print_stuff_nice_and_good(
                         result, "Errors between a date frame", generated_after, generated_before, limit, desc)
                 elif args == 'debug_origin':
                     origin = input("Enter <DEBUG> point of origin: ")
                     generated_after, generated_before = ask_date()
-                    verbose = sql_utils.get_debug_by_origin(
+                    verbose = fetcher.get_debug_by_origin(
                         origin, generated_after, generated_before)
                     print_stuff_nice_and_good(verbose, "Debug messages based on origin function/class",
                                               generated_after, generated_before, search_criteria=origin)
                 elif args == 'developer':
                     dev = input("Enter the developers name: ")
                     generated_after, generated_before = ask_date()
-                    verbose = sql_utils.get_debug_by_developers(
+                    verbose = fetcher.get_debug_by_developers(
                         dev, generated_after, generated_before)
                     print_stuff_nice_and_good(
                         verbose, "Debug messages based on developers name", generated_after, generated_before, search_criteria=dev)
                 elif args == 'mark_resolve':
                     error_name = input("Please provide error name: ")
                     origin = input("Please provide point of origin: ")
-                    result = sql_utils.mark_resolve(error_name, origin)
+                    result = fetcher.mark_resolve(error_name, origin)
                     print("Number of modified rows {}".format(result))
                 elif args == 'delete_debug':
-                    sql_utils.delete_old_debug()
+                    fetcher.delete_old_debug()
                 elif args == 'help':
                     command_man()
             else:
@@ -161,7 +163,11 @@ def ask_date():
         return (generated_after, generated_before)
 
 
-def print_stuff_nice_and_good(payload: dict, message: str = None, date_filter_after: datetime = None, date_filter_before: datetime = None, limit: int = 0, desc: bool = False, search_criteria: str = None):
+def print_stuff_nice_and_good(payload: dict, message: str = None, 
+                              date_filter_after: datetime = None, 
+                              date_filter_before: datetime = None, 
+                              limit: int = 0, desc: bool = False, 
+                              search_criteria: str = None):
     """
     print stuff in cute and functional way for now.
     payload: dict the payload you just received from the sqlite_utility file
@@ -237,7 +243,7 @@ def command_man():
         'developer': 'Search based on developers name. You can filter out the result based on date and descending order',
         'debug_origin': 'Shows debug messages based on point of origin. Point of origin is the class/function from where you are adding a message in sqlite.',
         'all_debug': 'Shows all debug messages',
-        'delete_debug': 'Deletes the last seven days of debug mesasges from the database. It is useful if you dont want to clutter the database with unnecessary debug info.',
+        'delete_debug': 'Deletes the last seven days of debug messsages from the database. It is useful if you do not want to clutter the database with unnecessary debug info.',
         'all_error': 'Shows all error messages',
         'error_name': 'Shows error based on a error name.',
         'date': 'Shows error occurred in between a specific date.',
@@ -248,7 +254,7 @@ def command_man():
     }
     print('usage: Zathura COMMAND [args] ...')
     print(
-        'For example: { Zathura v } will show the current version of this pacakge.')
+        'For example: { Zathura v } will show the current version of this package.')
     print('-----------------------------------------------------')
     print('-----------------------------------------------------')
     print("All commands: ")

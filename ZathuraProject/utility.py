@@ -41,16 +41,15 @@ class Utility:
         """
         return '%A, %d %B, %Y at 12 AM'
 
-    # lamda function
     @staticmethod
     def current_time_in_milli():
         return int(round(time() * 1000))
 
-    # unix time to current time in milli converstion
+    # unix time to current time in millisecond converstion
     @staticmethod
     def unix_time_millis(dt: datetime):
         """
-        Datetime to milisecond conversion in from UNIX time.
+        Datetime to millisecond conversion in from UNIX time.
         """
         epoch = datetime.utcfromtimestamp(0)
         return (dt - epoch).total_seconds() * 1000.0
@@ -58,6 +57,6 @@ class Utility:
     @staticmethod
     def milli_to_datetime(time: int):
         """
-        convert milisecond value to datetime instance.
+        convert millisecond value to datetime instance.
         """
         return datetime.fromtimestamp(time/1000.0).strftime(Utility.get_timeformat())

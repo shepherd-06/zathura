@@ -1,9 +1,11 @@
-from datetime import datetime, timedelta
-from Test.test_run import RunTest
-from ZathuraProject import Zathura
-import unittest
-import time
 import random
+import time
+import unittest
+from datetime import datetime, timedelta
+
+from Test.test_run import RunTest
+from ZathuraProject.fetcher import Fetcher
+from ZathuraProject.zathura import Zathura
 
 
 class TestAll(unittest.TestCase):
@@ -11,7 +13,7 @@ class TestAll(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """
-        This function will input random data inside sqlit3 database
+        This function will input random data inside sqlite database
         There will 150 entries each time this function is called.
         """
         RunTest().self_destruct()  # Just in case
@@ -32,7 +34,6 @@ class TestAll(unittest.TestCase):
             rows = zathura.insert_error_log(
                 "test123", error_name, "no description", warning=3)
             counter += rows
-
         # Insert debug data
         for i in range(0, 50):
             rows = zathura.insert_debug_log("Test")
@@ -44,7 +45,6 @@ class TestAll(unittest.TestCase):
         """
         Test insertion inside the database.
         Setup is done entirely by itself.
-        TODO: this function needs some extensive testing
         """
         zathura = Zathura()
         counter = 0
@@ -64,10 +64,9 @@ class TestAll(unittest.TestCase):
         This function will test that.
         TODO: These test cases were written on a rush. Must do a new check.
         """
-        zathura = Zathura()
         # ----------------------------------------------------------------------
         random_error_name = "No error - {}".format(random.randint(0, 50))
-        errors = zathura.get_error_by_error_name(random_error_name)
+        errors = Fetcher().get_error_by_error_name(random_error_name)
         _logs = errors['log']
         # Test one - matching error name.
         for log in _logs:
@@ -78,10 +77,11 @@ class TestAll(unittest.TestCase):
         # ----------------------------------------------------------------------
         random_error_name = "No error - {}".format(random.randint(0, 50))
         _datetime_limit = datetime.now() - timedelta(days=1)
-        errors = zathura.get_error_by_error_name(
+        errors = Fetcher().get_error_by_error_name(
             random_error_name, first_limit=_datetime_limit, desc=True)
         _logs = errors['log'] if 'log' in errors else list()
         # TODO: make it dynamic later may be.
+
         _error_name = errors['log'][0]['error_name']
         _logged_at_index_zero = datetime.fromtimestamp(
             int(_logs[0]['logged_at_unix']) / 1000)
@@ -99,7 +99,7 @@ class TestAll(unittest.TestCase):
         # Test Three - first datelimit and ascending
         random_error_name = "No error - {}".format(random.randint(0, 50))
         _datetime_limit = datetime.now() - timedelta(days=1)
-        errors = zathura.get_error_by_error_name(
+        errors = Fetcher().get_error_by_error_name(
             random_error_name, first_limit=_datetime_limit)
         _logs = errors['log'] if 'log' in errors else list()
         _logged_at_index_zero = datetime.fromtimestamp(
@@ -119,7 +119,7 @@ class TestAll(unittest.TestCase):
         random_error_name = "No error - {}".format(random.randint(0, 50))
         _datetime_limit = datetime.now() - timedelta(days=1)
         _last_date = datetime.now() + timedelta(days=1)
-        errors = zathura.get_error_by_error_name(
+        errors = Fetcher().get_error_by_error_name(
             random_error_name, first_limit=_datetime_limit, last_limit=_last_date, desc=True)
         _logs = errors['log'] if 'log' in errors else list()
         _logged_at_index_zero = datetime.fromtimestamp(
@@ -139,7 +139,7 @@ class TestAll(unittest.TestCase):
         random_error_name = "No error - {}".format(random.randint(0, 50))
         _datetime_limit = datetime.now() - timedelta(days=1)
         _last_date = datetime.now() + timedelta(days=1)
-        errors = zathura.get_error_by_error_name(
+        errors = Fetcher().get_error_by_error_name(
             random_error_name, first_limit=_datetime_limit, last_limit=_last_date, desc=False)
         _logs = errors['log'] if 'log' in errors else list()
         _logged_at_index_zero = datetime.fromtimestamp(
@@ -159,7 +159,7 @@ class TestAll(unittest.TestCase):
         random_error_name = "No error - {}".format(random.randint(0, 50))
         _datetime_limit = datetime.now() - timedelta(days=2)
         _last_date = datetime.now() + timedelta(days=1)
-        errors = zathura.get_error_by_error_name(
+        errors = Fetcher().get_error_by_error_name(
             random_error_name, first_limit=_datetime_limit, last_limit=_last_date, desc=True, limit=2)
         _logs = errors['log'] if 'log' in errors else list()
         _logged_at_index_zero = datetime.fromtimestamp(
@@ -174,13 +174,13 @@ class TestAll(unittest.TestCase):
             _logged_at = datetime.fromtimestamp(
                 int(log['logged_at_unix']) / 1000)
             self.assertGreaterEqual(_logged_at_index_zero, _logged_at,
-                                    'Searchc by name, first date limit, last date limit, descending order: order did not work')
+                                    'Search by name, first date limit, last date limit, descending order: order did not work')
             _logged_at_index_zero = _logged_at
         # ----------------------------------------------------------------------
 
         # Test Seven - Mandatory failed with out of scope error name
-        random_error_name = 'osijsgg'
-        errors = zathura.get_error_by_error_name(random_error_name)
+        random_error_name = 'Pikachu'
+        errors = Fetcher().get_error_by_error_name(random_error_name)
         total = errors['total'] if 'total' in errors else -1
         self.assertEqual(
             total, 0, 'Random error name came out wrong or something. This must come out False')
@@ -192,13 +192,12 @@ class TestAll(unittest.TestCase):
         the point of origin (caller function). 
         It will check if that function works properly
         """
-        zathura = Zathura()
         origin = self.setUpClass.__name__
         origin = origin.lower()
 
         # ---------------------------------------------------------
         # Test 1 - Plain search by origin name
-        errors = zathura.get_error_by_origin(origin)
+        errors = Fetcher().get_error_by_origin(origin)
         logs = errors['log'] if 'log' in errors else list()
         total = errors['total'] if 'total' in errors else -1
         self.assertNotEqual(len(logs), 0, 'logs are empty! It cant be!')
@@ -215,14 +214,14 @@ class TestAll(unittest.TestCase):
         # ---------------------------------------------------------
         # Test 2 - Origin name + first date limit
         first_date = datetime.now() - timedelta(days=random.randint(1, 30))
-        errors = zathura.get_error_by_origin(origin, first_limit=first_date)
+        errors = Fetcher().get_error_by_origin(origin, first_limit=first_date)
         # ---------------------------------------------------------
 
         # ---------------------------------------------------------
         # Test 3 - origin name + first date limit, limit
         first_date = datetime.now() - timedelta(days=random.randint(1, 30))
         limit = random.randint(1, 149)
-        errors = zathura.get_error_by_origin(
+        errors = Fetcher().get_error_by_origin(
             origin, first_limit=first_date, limit=limit, desc=True)
         # ---------------------------------------------------------
 
@@ -230,7 +229,7 @@ class TestAll(unittest.TestCase):
         # Test 4 - origin name + first date limit, limit, descending
         first_date = datetime.now() - timedelta(days=random.randint(1, 30))
         limit = random.randint(1, 149)
-        errors = zathura.get_error_by_origin(
+        errors = Fetcher().get_error_by_origin(
             origin, first_limit=first_date, limit=limit, desc=True)
         # ---------------------------------------------------------
 
@@ -238,7 +237,7 @@ class TestAll(unittest.TestCase):
         # Test 5 - origin name + first date, last date
         first_date = datetime.now() - timedelta(days=random.randint(1, 30))
         last_date = datetime.now() + timedelta(days=random.randint(0, 30))
-        errors = zathura.get_error_by_origin(
+        errors = Fetcher().get_error_by_origin(
             origin, first_limit=first_date, last_limit=last_date)
         # ---------------------------------------------------------
 
@@ -247,13 +246,13 @@ class TestAll(unittest.TestCase):
         first_date = datetime.now() - timedelta(days=random.randint(1, 30))
         last_date = datetime.now() + timedelta(days=random.randint(0, 30))
         limit = random.randint(1, 149)
-        errors = zathura.get_error_by_origin(
+        errors = Fetcher().get_error_by_origin(
             origin, first_limit=first_date, last_limit=last_date, limit=limit, desc=True)
         # ---------------------------------------------------------
 
         # ---------------------------------------------------------
         # Test 7 - search by wrong origin name
-        errors = zathura.get_error_by_origin("kljisksknnkshs")
+        errors = Fetcher().get_error_by_origin("Mount Kilimanjaro")
         # ---------------------------------------------------------
 
     def test_search_in_between_dates(self):
@@ -261,13 +260,11 @@ class TestAll(unittest.TestCase):
         Tests search in between date (first limit and last limit)
         if last limit is not present datetime.now() is not present.
         """
-        zathura = Zathura()
-
         # ------------------------------------------------------
         # Test 1 - Test with date only
         _before = datetime.now() - timedelta(days=7)
         _after = datetime.now() + timedelta(days=1)
-        errors = zathura.get_error_by_date_limit(_before, _after)
+        errors = Fetcher().get_error_by_date_limit(_before, _after)
 
         total = errors['total'] if 'total' in errors else -1
         logs = errors['log'] if 'log' in errors else list()
@@ -286,14 +283,14 @@ class TestAll(unittest.TestCase):
             _logged_at = datetime.fromtimestamp(
                 int(log['logged_at_unix']) / 1000)
             self.assertGreaterEqual(_logged_at_index_zero, _logged_at,
-                                    'Searchc by name, first date limit, last date limit, descending order: order did not work')
+                                    'Search by name, first date limit, last date limit, descending order: order did not work')
             _logged_at_index_zero = _logged_at
         # ------------------------------------------------------
 
         # ------------------------------------------------------
         # Test 5 - Test with first limit only
         _before = datetime.now() - timedelta(days=1)
-        errors = zathura.get_error_by_date_limit(_before)
+        errors = Fetcher().get_error_by_date_limit(_before)
 
         total = errors['total'] if 'total' in errors else -1
         logs = errors['log'] if 'log' in errors else list()
@@ -311,7 +308,7 @@ class TestAll(unittest.TestCase):
             _logged_at = datetime.fromtimestamp(
                 int(log['logged_at_unix']) / 1000)
             self.assertGreaterEqual(_logged_at_index_zero, _logged_at,
-                                    'Searchc by name, first date limit, last date limit, descending order: order did not work')
+                                    'Search by name, first date limit, last date limit, descending order: order did not work')
             _logged_at_index_zero = _logged_at
         # ------------------------------------------------------
 
@@ -319,7 +316,7 @@ class TestAll(unittest.TestCase):
         # Test 6 - Test destined to come empty
         _before = datetime.now() + timedelta(days=7)
         _after = datetime.now() + timedelta(days=14)
-        errors = zathura.get_error_by_date_limit(_before)
+        errors = Fetcher().get_error_by_date_limit(_before)
 
         total = errors['total'] if 'total' in errors else -1
         logs = errors['log'] if 'log' in errors else list()
@@ -334,7 +331,7 @@ class TestAll(unittest.TestCase):
         # Test 2 - Test with date, descending
         _before = datetime.now() - timedelta(days=3)
         _after = datetime.now()
-        errors = zathura.get_error_by_date_limit(_before, _after, desc=True)
+        errors = Fetcher().get_error_by_date_limit(_before, _after, desc=True)
 
         total = errors['total'] if 'total' in errors else -1
         logs = errors['log'] if 'log' in errors else list()
@@ -354,7 +351,7 @@ class TestAll(unittest.TestCase):
             _logged_at = datetime.fromtimestamp(
                 int(log['logged_at_unix']) / 1000)
             self.assertLessEqual(_logged_at_index_zero, _logged_at,
-                                 'Searchc by name, first date limit, last date limit, descending order: order did not work')
+                                 'Search by name, first date limit, last date limit, descending order: order did not work')
             _logged_at_index_zero = _logged_at
         # ------------------------------------------------------
 
@@ -363,7 +360,7 @@ class TestAll(unittest.TestCase):
         _before = datetime.now() - timedelta(days=3)
         _after = datetime.now()
         limit = random.randint(1, 150)
-        errors = zathura.get_error_by_date_limit(_before, _after, limit=limit)
+        errors = Fetcher().get_error_by_date_limit(_before, _after, limit=limit)
 
         total = errors['total'] if 'total' in errors else -1
         logs = errors['log'] if 'log' in errors else list()
@@ -383,7 +380,7 @@ class TestAll(unittest.TestCase):
         _before = datetime.now() - timedelta(days=3)
         _after = datetime.now()
         limit = random.randint(1, 150)
-        errors = zathura.get_error_by_date_limit(
+        errors = Fetcher().get_error_by_date_limit(
             _before, _after, limit=limit, desc=True)
 
         total = errors['total'] if 'total' in errors else -1
@@ -405,10 +402,8 @@ class TestAll(unittest.TestCase):
         if they are already marked resolved, generates an error.
         if not, they are marked and good to go.
         """
-        # self.database_setup()
-        zathura = Zathura()
         import random
-        all_errors = zathura.get_all_error_log()
+        all_errors = Fetcher().get_all_error_log()
         total = all_errors['total'] if 'total' in all_errors else 0
         self.assertNotEqual(
             total, 0, 'There is not enough value in test database!')
@@ -418,12 +413,12 @@ class TestAll(unittest.TestCase):
                 # mark it resolved.
                 error_name = "No error - {}".format(_)
                 origin = self.setUpClass.__name__
-                result = zathura.mark_resolve(error_name, origin)
+                result = Fetcher().mark_resolve(error_name, origin)
                 if isinstance(result, int):
                     if result > 0:
                         status = True
                     else:
-                        particular_error = zathura.get_error_by_error_name(
+                        particular_error = Fetcher().get_error_by_error_name(
                             "No error - {}".format(_))
                         print(particular_error)
                         particular_log = particular_error['log'] if 'log' in particular_error else list(
@@ -444,10 +439,9 @@ class TestAll(unittest.TestCase):
         This function is moderately stable right now
         """
         # Total 4 major test
-        zathura = Zathura()
         # ----------------------------------------------------------------
         # Test 1
-        all_errors = zathura.get_all_error_log(show_all=True)
+        all_errors = Fetcher().get_all_error_log(show_all=True)
         total = all_errors['total'] if 'total' in all_errors else -1
         self.assertGreaterEqual(
             total, 150, 'Test all error - Not all value were including in sending all data')
@@ -455,7 +449,7 @@ class TestAll(unittest.TestCase):
 
         # ----------------------------------------------------------------
         # Test 2
-        all_errors = zathura.get_all_error_log(show_all=False, desc=True)
+        all_errors = Fetcher().get_all_error_log(show_all=False, desc=True)
         total = all_errors['total'] if 'total' in all_errors else -1
         self.assertNotEqual(total, -1, 'Test all error - Total is not -1')
         self.assertGreaterEqual(
@@ -474,7 +468,7 @@ class TestAll(unittest.TestCase):
 
         # ----------------------------------------------------------------
         # Test 3
-        all_errors = zathura.get_all_error_log(show_all=True, desc=True)
+        all_errors = Fetcher().get_all_error_log(show_all=True, desc=True)
         total = all_errors['total'] if 'total' in all_errors else -1
         self.assertNotEqual(total, -1, 'Test all error - Total is not -1')
         self.assertLessEqual(
@@ -496,7 +490,7 @@ class TestAll(unittest.TestCase):
 
         # ----------------------------------------------------------------
         # Test 4
-        all_errors = zathura.get_all_error_log(show_all=False)
+        all_errors = Fetcher().get_all_error_log(show_all=False)
         total = all_errors['total'] if 'total' in all_errors else -1
         self.assertNotEqual(total, -1, 'Test all error - Total is not -1')
         self.assertLessEqual(
@@ -523,9 +517,7 @@ class TestAll(unittest.TestCase):
         """
         test get_all_debug message function
         """
-        zathura = Zathura()
-
-        debugs = zathura.get_all_debug_log()
+        debugs = Fetcher().get_all_debug_log()
         total = debugs['total'] if 'total' in debugs else -1
         logs = debugs['log'] if 'log' in debugs else list()
 
@@ -542,8 +534,7 @@ class TestAll(unittest.TestCase):
         Test debug under user
         total dum dum functions. Still test it since I wrote it.
         """
-        zathura = Zathura()
-        verbose = zathura.get_debug_by_developers()
+        verbose = Fetcher().get_debug_by_developers()
         total = verbose['total'] if 'total' in verbose else -1
         logs = verbose['log'] if 'log' in verbose else list()
 
@@ -553,21 +544,21 @@ class TestAll(unittest.TestCase):
             total, -1, "total value cannot be -1. Error occurred somewhere")
         self.assertNotEqual(total, 0, "debug logs are not suppose to be ZerO!")
 
-        verbose = zathura.get_debug_by_developers(developers_name='zathura')
+        verbose = Fetcher().get_debug_by_developers(developers_name='zathura')
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertNotEqual(
             len(logs), 0, "debug logs are not suppose to be ZerO!")
         for log in logs:
             self.assertEqual(log['user'], 'zathura',
-                             'user name did not matcheio')
+                             'user name did not match')
 
-        verbose = zathura.get_debug_by_developers(developers_name='puka poka')
+        verbose = Fetcher().get_debug_by_developers(developers_name='Ashe')
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertEqual(len(logs), 0, "debug logs are supposed to be ZerO!")
 
         first_limit = datetime.now() - timedelta(days=2)
         last_limit = datetime.now() + timedelta(days=1)
-        verbose = zathura.get_debug_by_developers(
+        verbose = Fetcher().get_debug_by_developers(
             developers_name='zathura', first_limit=first_limit, last_limit=last_limit)
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertNotEqual(
@@ -582,7 +573,7 @@ class TestAll(unittest.TestCase):
                            "last log time should be less than limit or equal")
 
         first_limit = datetime.now() - timedelta(days=1)
-        verbose = zathura.get_debug_by_developers(
+        verbose = Fetcher().get_debug_by_developers(
             developers_name='zathura', first_limit=first_limit)
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertNotEqual(
@@ -592,7 +583,7 @@ class TestAll(unittest.TestCase):
         self.assertGreaterEqual(
             first_log, first_limit, "log time should be less than or equal to datetime")
 
-        verbose = zathura.get_debug_by_developers('')
+        verbose = Fetcher().get_debug_by_developers('')
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertNotEqual(
             len(logs), 0, "debug logs are not suppose to be ZerO!")
@@ -601,10 +592,9 @@ class TestAll(unittest.TestCase):
         """
         Test get debug by origin under multiple function parameter
         """
-        zathura = Zathura()
         origin = self.setUpClass.__name__
 
-        verbose = zathura.get_debug_by_origin(origin=origin)
+        verbose = Fetcher().get_debug_by_origin(origin=origin)
         total = verbose['total'] if 'total' in verbose else -1
         logs = verbose['log'] if 'log' in verbose else list()
 
@@ -620,7 +610,7 @@ class TestAll(unittest.TestCase):
 
         first_limit = datetime.now() - timedelta(days=2)
         last_limit = datetime.now() + timedelta(days=1)
-        verbose = zathura.get_debug_by_origin(origin, first_limit, last_limit)
+        verbose = Fetcher().get_debug_by_origin(origin, first_limit, last_limit)
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertNotEqual(len(logs), 0, "logs cannot be empty now!")
         first_log = datetime.fromtimestamp(
@@ -633,19 +623,19 @@ class TestAll(unittest.TestCase):
                            "last log time should be less than limit or equal")
 
         first_limit = datetime.now() - timedelta(days=1)
-        verbose = zathura.get_debug_by_origin(origin, first_limit)
+        verbose = Fetcher().get_debug_by_origin(origin, first_limit)
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertGreater(len(logs), 0, "logs cannot be empty now!")
 
-        verbose = zathura.get_debug_by_origin(
+        verbose = Fetcher().get_debug_by_origin(
             origin='', first_limit=first_limit, last_limit=last_limit)
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertGreater(len(logs), 0, "logs cannot be empty now!")
 
-        verbose = zathura.get_debug_by_origin(origin='hello_world')
+        verbose = Fetcher().get_debug_by_origin(origin='hello_world')
         logs = verbose['log'] if 'log' in verbose else list()
         self.assertEqual(
-            len(logs), 0, "logs are supposed to be zeroooooo here!")
+            len(logs), 0, "There are supposed to be no log here!")
 
     @classmethod
     def tearDownClass(cls):
