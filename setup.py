@@ -13,7 +13,7 @@ install_requires = [
 
 setup(name='zathura',
       packages=['ZathuraProject'],
-      version='0.0.5.5.b1',
+      version='0.0.5.7.b1',
       description='Zathura is a small space logger. It logs stuff into her logbook as she drifts into vast unknown of development phase.',
       long_description=long_description,
       long_description_content_type='text/markdown',
