@@ -7,7 +7,7 @@ def send_data(data, url):
     """
     Makes a little post request here. Will add new stuff later.
     """
-    requests.post(url, data=data)
+    return requests.post(url, data=data)
 
 
 def send_data_to_bugtracker(**kwargs):
@@ -19,13 +19,14 @@ def send_data_to_bugtracker(**kwargs):
             "point_of_origin": kwargs["origin"]
         }
 
-        process = multiprocessing.Process(target=send_data,
-                                          args=(data, kwargs["url"]))
-        process.start()
-        process.join()
+        # process = multiprocessing.Process(target=send_data,
+        #                                   args=(data, kwargs["url"]))
+        # process.start()
+        # process.join()
+        _ = send_data(data, kwargs["url"])
         return True
     except Exception as e:
-        process.join()
+        # process.join()
         print("Exception -> {}".format(e))
         return False
 
@@ -40,13 +41,14 @@ def send_verbose_log_to_bugtracker(**kwargs):
             "log_description": kwargs["description"],
             "project_token": kwargs["project_token"]
         }
-        process = multiprocessing.Process(target=send_data,
-                                          args=(payload, 
-                                                kwargs["bugtracker_url"]))
-        process.start()
-        process.join()
+        # process = multiprocessing.Process(target=send_data,
+        #                                   args=(payload,
+        #                                         kwargs["bugtracker_url"]))
+        # process.start()
+        # process.join()
+        _ = send_data(payload, kwargs["bugtracker_url"])
         return True
     except Exception as e:
-        process.join()
+        # process.join()
         print("Exception occurred! : {}".format(e))
         return False
