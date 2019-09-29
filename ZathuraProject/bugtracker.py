@@ -18,6 +18,8 @@ def send_data_to_bugtracker(**kwargs):
             "error_description": kwargs["description"],
             "point_of_origin": kwargs["origin"]
         }
+        if kwargs["user"] is not None:
+            data["identifier"] = kwargs["user"]
 
         # process = multiprocessing.Process(target=send_data,
         #                                   args=(data, kwargs["url"]))
@@ -41,6 +43,8 @@ def send_verbose_log_to_bugtracker(**kwargs):
             "log_description": kwargs["description"],
             "project_token": kwargs["project_token"]
         }
+        if kwargs["user"] is not None:
+            payload["identifier"] = kwargs["user"]
         # process = multiprocessing.Process(target=send_data,
         #                                   args=(payload,
         #                                         kwargs["bugtracker_url"]))

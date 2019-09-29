@@ -24,7 +24,7 @@ class Zathura:
             self.error_url = bugtracker_url + "project/error/log/"
             self.verbose_url = bugtracker_url + "project/verbose/log/"
 
-    def send_error_log_bugtracker(self, error_name, error_description):
+    def send_error_log_bugtracker(self, error_name, error_description, user=None):
         """
         sends error log data on bugtracker website
 
@@ -37,10 +37,12 @@ class Zathura:
                 description=error_description,
                 origin=point_of_origin,
                 token=self.project_token,
-                url=self.error_url)
+                url=self.error_url,
+                user=user
+            )
         return False
 
-    def send_verbose_log_bugtracker(self, descrption: None):
+    def send_verbose_log_bugtracker(self, descrption=None, user=None):
         """
         Sends the verbose log to bugtracker website.
 
@@ -52,7 +54,8 @@ class Zathura:
                 origin=point_of_origin,
                 description=descrption,
                 project_token=self.project_token,
-                bugtracker_url=self.verbose_url
+                bugtracker_url=self.verbose_url,
+                user=user
             )
         return False
 
