@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ibtehaz-shawon/zathura.svg?branch=master)](https://travis-ci.org/ibtehaz-shawon/zathura)
+[![Build Status](https://travis-ci.org/p1r-a-t3/zathura.svg?branch=master)](https://travis-ci.org/p1r-a-t3/zathura)
 
 ```
 ______       ___________                       
