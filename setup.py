@@ -5,21 +5,22 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+short_description = "Zathura is the utility package of bugtracker. Check https://github.com/p1r-a-t3/Bugtracker for details"
+
+
 install_requires = [
-    'peewee',
     'pyfiglet',
 ]
-# https://the-hitchhikers-guide-to-packaging.readthedocs.io/en/latest/specification.html
 
 setup(name='zathura',
       packages=['ZathuraProject'],
       version='0.0.6.0b1',
-      description='Zathura is a small space logger. It logs stuff into her logbook as she drifts into vast unknown of development phase.',
+      description='',
       long_description=long_description,
       long_description_content_type='text/markdown',
       url='https://github.com/p1r-a-t3/zathura',
       author='Mr Anderson',
-      author_email='ibtehaz.92@gmail.com',
+      author_email='ibtehaz.shawon@gmail.com',
       license='MIT',
       install_requires=[
           install_requires

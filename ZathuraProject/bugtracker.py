@@ -21,14 +21,9 @@ def send_data_to_bugtracker(**kwargs):
         if kwargs["user"] is not None:
             data["identifier"] = kwargs["user"]
 
-        # process = multiprocessing.Process(target=send_data,
-        #                                   args=(data, kwargs["url"]))
-        # process.start()
-        # process.join()
         _ = send_data(data, kwargs["url"])
         return True
     except Exception as e:
-        # process.join()
         print("Exception -> {}".format(e))
         return False
 
@@ -45,14 +40,8 @@ def send_verbose_log_to_bugtracker(**kwargs):
         }
         if kwargs["user"] is not None:
             payload["identifier"] = kwargs["user"]
-        # process = multiprocessing.Process(target=send_data,
-        #                                   args=(payload,
-        #                                         kwargs["bugtracker_url"]))
-        # process.start()
-        # process.join()
         _ = send_data(payload, kwargs["bugtracker_url"])
         return True
     except Exception as e:
-        # process.join()
         print("Exception occurred! : {}".format(e))
         return False

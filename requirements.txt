@@ -27,6 +27,7 @@ pyfiglet==0.8.post1
 Pygments==2.3.1
 pylint==2.2.2
 pyparsing==2.3.1
+python-decouple==3.1
 pytz==2018.7
 readme-renderer==24.0
 requests==2.21.0
@@ -41,6 +42,6 @@ stevedore==1.30.0
 tqdm==4.29.1
 twine==1.12.1
 typed-ast==1.2.0
-urllib3==1.24.2
+urllib3==1.24.1
 webencodings==0.5.1
 wrapt==1.11.1
