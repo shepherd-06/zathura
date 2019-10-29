@@ -1,16 +1,20 @@
 import requests
 import json
-import multiprocessing
 
 
 def send_data(data, url):
     """
-    Makes a little post request here. Will add new stuff later.
+    sends data to bugtracker (local deployment) using requests package.
     """
     return requests.post(url, data=data)
 
 
 def send_data_to_bugtracker(**kwargs):
+    """
+    sends error log to bugtracker. 
+    mandatory parameters: url, token, name, description and origin
+    optional parameters: user.
+    """
     try:
         data = {
             "project_token": kwargs["token"],
@@ -21,7 +25,12 @@ def send_data_to_bugtracker(**kwargs):
         if kwargs["user"] is not None:
             data["identifier"] = kwargs["user"]
 
-        _ = send_data(data, kwargs["url"])
+        response = send_data(data, kwargs["url"])
+        if response.status_code != 200:
+            print("--------------------------------")
+            print(response.text)
+            print("--------------------------------\n\n")
+            return False
         return True
     except Exception as e:
         print("Exception -> {}".format(e))
@@ -30,7 +39,9 @@ def send_data_to_bugtracker(**kwargs):
 
 def send_verbose_log_to_bugtracker(**kwargs):
     """
-    sends the data from any calling class to server
+    sends verbose log to bugtracker server
+    mandatory parameters: url, project_token, description and origin
+    optional parameters: user.
     """
     try:
         payload = {
@@ -40,7 +51,12 @@ def send_verbose_log_to_bugtracker(**kwargs):
         }
         if kwargs["user"] is not None:
             payload["identifier"] = kwargs["user"]
-        _ = send_data(payload, kwargs["bugtracker_url"])
+        response = send_data(payload, kwargs["bugtracker_url"])
+        if response.status_code != 200:
+            print("--------------------------------")
+            print(response.text)
+            print("--------------------------------\n\n")
+            return False
         return True
     except Exception as e:
         print("Exception occurred! : {}".format(e))

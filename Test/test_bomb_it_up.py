@@ -1,9 +1,4 @@
-import random
-import time
 import unittest
-from datetime import datetime, timedelta
-
-from ZathuraProject.zathura import Zathura
 
 
 class TestAll(unittest.TestCase):

@@ -7,7 +7,6 @@ from decouple import config
 
 from ZathuraProject import Zathura
 
-
 class TestBugtracker(unittest.TestCase):
 
     """
@@ -25,7 +24,7 @@ class TestBugtracker(unittest.TestCase):
         counter = 0
         for i in range(0, 2):
             error_name = "Second Test error - {}".format(i)
-            state = zathura.send_error_log_bugtracker(
+            state = zathura.log_error(
                 error_name,
                 "no description")
             counter = counter + 1 if state else counter + 0
@@ -34,7 +33,7 @@ class TestBugtracker(unittest.TestCase):
         counter = 0
         for i in range(0, 2):
             error_name = "Third Test error - {}".format(i)
-            state = zathura.send_error_log_bugtracker(
+            state = zathura.log_error(
                 error_name,
                 "no description",
                 "Test")
@@ -50,7 +49,7 @@ class TestBugtracker(unittest.TestCase):
         counter = 0
 
         for i in range(0, 2):
-            state = zathura.send_verbose_log_bugtracker(
+            state = zathura.log_verbose(
                 "Multiprocessing Test: {}".format(i))
             counter = counter + 1 if state else counter + 0
         self.assertEqual(
@@ -58,7 +57,7 @@ class TestBugtracker(unittest.TestCase):
 
         counter = 0
         for i in range(0, 2):
-            state = zathura.send_verbose_log_bugtracker(
+            state = zathura.log_verbose(
                 "Multiprocessing Test: {}".format(i), "Test")
             counter = counter + 1 if state else counter + 0
         self.assertEqual(
